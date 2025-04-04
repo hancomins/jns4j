@@ -1,0 +1,24 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.hancomins.jsn4j'
+// 프로퍼티의 version을 읽어오고 없으면 0.0으로 설정
+version =  project.hasProperty("version") ? project.property("version") : "0.0"
+
+repositories {
+    mavenCentral()
+}
+
+// java8 기반
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
