@@ -2,18 +2,37 @@ package com.hancomins.jsn4j.simple;
 
 import com.hancomins.jsn4j.*;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 public class SimpleArray implements ArrayContainer {
-    private final ArrayList<ContainerValue> values = new ArrayList<>();
+    private final ArrayList<ContainerValue> values;
     private SimpleJsonWriter jsonWriter;
+
+    public SimpleArray() {
+        this.values = new ArrayList<>();
+    }
+
+    public SimpleArray(String jsonArray) {
+        ContainerValue containerValue = getContainerFactory().getParser().parse(jsonArray);
+        if(!containerValue.isArray()) {
+            throw new IllegalArgumentException("Invalid JSON array: " + jsonArray);
+        }
+        this.values = new ArrayList<>( ((SimpleArray)containerValue.asArray()).values);
+    }
 
     @Override
     public ArrayContainer put(int index, Object value) {
         if(value instanceof ContainerValue) {
             ensure(index + 1);
             values.set(index, (ContainerValue)value);
+            return this;
+        } else if(value instanceof Collection) {
+            ensure(index + 1);
+            values.set(index,ContainerValues.collectionToArrayContainer(this, (Collection<?>)value));
+            return this;
+        } else if(value instanceof Map) {
+            ensure(index + 1);
+            values.set(index,ContainerValues.mapToObjectContainer(this, (Map<?,?>)value));
             return this;
         }
         PrimitiveValue containerValue = new PrimitiveValue(value);
@@ -38,6 +57,10 @@ public class SimpleArray implements ArrayContainer {
         if(value instanceof ContainerValue) {
             values.add((ContainerValue)value);
             return this;
+        } else if(value instanceof Collection) {
+            values.add(ContainerValues.collectionToArrayContainer(this, (Collection<?>)value));
+        } else if(value instanceof Map) {
+            values.add(ContainerValues.mapToObjectContainer(this, (Map<?,?>)value));
         }
         PrimitiveValue containerValue = new PrimitiveValue(value);
         values.add(containerValue);
@@ -84,7 +107,7 @@ public class SimpleArray implements ArrayContainer {
     }
 
     @Override
-    public ContainerFactory getFactory() {
+    public ContainerFactory getContainerFactory() {
         return SimpleJsonContainerFactory.getInstance();
     }
 

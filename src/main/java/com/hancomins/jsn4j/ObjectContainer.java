@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings("UnusedReturnValue")
-public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<String, ContainerValue>> {
+public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<String, ContainerValue>>, ContainerFactoryProvidable {
 
     int size();
 
@@ -13,14 +13,29 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     ObjectContainer put(String key, Object value);
 
+
+    default ObjectContainer putIfAbsent(String key, Object value) {
+        if (!containsKey(key)) {
+            return put(key, value);
+        }
+        return this;
+    }
+
+    default ObjectContainer putIfPresent(String key, Object value) {
+        if (containsKey(key)) {
+            return put(key, value);
+        }
+        return this;
+    }
+
     default ObjectContainer put(String key, char value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     default ObjectContainer put(String key, byte value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     default ObjectContainer put(String key, short value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
 
 
@@ -40,19 +55,19 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
 
     default ObjectContainer put(String key, int value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     default ObjectContainer put(String key, long value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     default ObjectContainer put(String key, float value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     default ObjectContainer put(String key, double value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     default ObjectContainer put(String key, boolean value) {
-        return put(key, new PrimitiveValue(value));
+        return put(key, getContainerFactory().newPrimitive(value));
     }
     ObjectContainer put(String key, ContainerValue value);
 
@@ -329,9 +344,6 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
         ContainerValues.copy(child, source);
         return child;
     }
-
-    ContainerFactory getFactory();
-
 
 
 }

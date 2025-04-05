@@ -28,14 +28,11 @@ public class SimpleJsonContainerFactory implements ContainerFactory {
         return new SimpleArray();
     }
 
-    @Override
-    public ObjectContainer newObject(ObjectContainer rootContainer) {
-        return new SimpleObject();
-    }
-
 
     @Override
     public ContainerParser getParser() {
         return parser;
     }
+
+
 }

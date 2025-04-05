@@ -1,6 +1,8 @@
 package com.hancomins.jsn4j;
 
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 public class ContainerValues {
@@ -135,7 +137,7 @@ public class ContainerValues {
             case OBJECT:
                 ObjectContainer objA = a.asObject();
                 ObjectContainer objB = b.asObject();
-                ObjectContainer result = objA.getFactory().newObject();
+                ObjectContainer result = objA.getContainerFactory().newObject();
                 for (String key : objA.keySet()) {
                     if (objB.containsKey(key) && equals(objA.get(key), objB.get(key))) {
                         ContainerValue val = objA.get(key);
@@ -146,7 +148,7 @@ public class ContainerValues {
             case ARRAY:
                 ArrayContainer arrA = a.asArray();
                 ArrayContainer arrB = b.asArray();
-                ArrayContainer resultArr = arrA.getFactory().newArray();
+                ArrayContainer resultArr = arrA.getContainerFactory().newArray();
                 int size = Math.min(arrA.size(), arrB.size());
                 for (int i = 0; i < size; i++) {
                     if (equals(arrA.get(i), arrB.get(i))) {
@@ -178,7 +180,7 @@ public class ContainerValues {
             case OBJECT:
                 ObjectContainer objA = a.asObject();
                 ObjectContainer objB = b.asObject();
-                ObjectContainer result = objA.getFactory().newObject();
+                ObjectContainer result = objA.getContainerFactory().newObject();
                 for (String key : objA.keySet()) {
                     if (!objB.containsKey(key) || !equals(objA.get(key), objB.get(key))) {
                         ContainerValue val = objA.get(key);
@@ -189,7 +191,7 @@ public class ContainerValues {
             case ARRAY:
                 ArrayContainer arrA = a.asArray();
                 ArrayContainer arrB = b.asArray();
-                ArrayContainer resultArr = arrA.getFactory().newArray();
+                ArrayContainer resultArr = arrA.getContainerFactory().newArray();
                 int size = Math.min(arrA.size(), arrB.size());
                 for (int i = 0; i < size; i++) {
                     if (!equals(arrA.get(i), arrB.get(i))) {
@@ -245,4 +247,53 @@ public class ContainerValues {
             resultObj.putCopy(key,val.asArray());
         }
     }
+
+
+    public static ObjectContainer mapToObjectContainer(ContainerFactoryProvidable containerFactoryProvidable, Map<?, ?> map) {
+        ContainerFactory containerFactory = containerFactoryProvidable.getContainerFactory();
+        ObjectContainer objectContainer;
+        if(containerFactoryProvidable instanceof ContainerValue) {
+            objectContainer = containerFactory.newObject((ContainerValue)containerFactoryProvidable);
+        } else {
+            objectContainer = containerFactory.newObject();
+        }
+
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
+            String key = String.valueOf(entry.getKey());
+            Object value = entry.getValue();
+            if (value instanceof Map) {
+                objectContainer.put(key, mapToObjectContainer(containerFactoryProvidable, (Map<?, ?>)value));
+            } else if (value instanceof Collection) {
+                objectContainer.put(key, collectionToArrayContainer(containerFactoryProvidable,(Collection<?>)value));
+            } else {
+                objectContainer.put(key, value);
+            }
+        }
+        return objectContainer;
+    }
+
+
+    public static ArrayContainer collectionToArrayContainer(ContainerFactoryProvidable containerFactoryProvidable, Collection<?> list) {
+        ContainerFactory containerFactory = containerFactoryProvidable.getContainerFactory();
+        ArrayContainer arrayContainer;
+        if(containerFactoryProvidable instanceof ContainerValue) {
+            arrayContainer = containerFactory.newArray((ContainerValue)containerFactoryProvidable);
+        } else {
+            arrayContainer = containerFactory.newArray();
+        }
+
+        for (Object value : list) {
+            if (value instanceof Map) {
+                arrayContainer.put(mapToObjectContainer(containerFactoryProvidable, (Map<?, ?>)value));
+            } else if (value instanceof Collection) {
+                arrayContainer.put(collectionToArrayContainer(containerFactoryProvidable, (Collection<?>)value));
+            } else {
+                arrayContainer.put(value);
+            }
+        }
+        return arrayContainer;
+    }
+
+
+
 }

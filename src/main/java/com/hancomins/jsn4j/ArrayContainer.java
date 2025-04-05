@@ -3,68 +3,69 @@ package com.hancomins.jsn4j;
 
 import java.util.List;
 
-public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue> {
+@SuppressWarnings("UnusedReturnValue")
+public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>, ContainerFactoryProvidable {
 
 
 
     ArrayContainer put(int index, Object value);
 
     default ArrayContainer put(int index, byte value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
 
     default ArrayContainer put(int index, short value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(int index, byte[] value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
 
     default ArrayContainer put(int index, int value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(int index, long value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(int index, float value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(int index, double value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(int index, boolean value) {
-        return put(index, new PrimitiveValue(value));
+        return put(index, getContainerFactory().newPrimitive(value));
     }
 
     ArrayContainer put(Object value);
 
     default ArrayContainer put(char value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(byte value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(short value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(byte[] value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
 
     default ArrayContainer put(int value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(long value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(float value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(double value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
     default ArrayContainer put(boolean value) {
-        return put(new PrimitiveValue(value));
+        return put(getContainerFactory().newPrimitive(value));
     }
 
     default ObjectContainer putCopy(ObjectContainer source) {
@@ -344,7 +345,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     void clear();
 
-    ContainerFactory getFactory();
+
 
 
 

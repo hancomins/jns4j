@@ -8,9 +8,22 @@ public class SimpleObject implements ObjectContainer {
 
 
 
-    private final HashMap<String, ContainerValue> objectMap = new HashMap<>();
+    private final HashMap<String, ContainerValue> objectMap;
     private SimpleJsonWriter jsonWriter;
 
+
+    public SimpleObject() {
+        this.objectMap = new HashMap<>();
+    }
+
+    public SimpleObject(String jsonObject) {
+        SimpleJsonParser parser = new SimpleJsonParser();
+        ContainerValue containerValue = parser.parse(jsonObject);
+        if(!containerValue.isObject()) {
+            throw new IllegalArgumentException("Invalid JSON object: " + jsonObject);
+        }
+        this.objectMap = ((SimpleObject)containerValue.asObject()).objectMap;
+    }
 
 
     @Override
@@ -22,7 +35,12 @@ public class SimpleObject implements ObjectContainer {
     public ObjectContainer put(String key, Object value) {
         if (value instanceof ContainerValue) {
             objectMap.put(key, (ContainerValue) value);
-        } else {
+        } else if(value instanceof Collection) {
+            objectMap.put(key, ContainerValues.collectionToArrayContainer(this, (Collection<?>) value));
+        } else if(value instanceof Map) {
+            objectMap.put(key, ContainerValues.mapToObjectContainer(this, (Map<?, ?>) value));
+        }
+        else {
             PrimitiveValue primitiveValue = new PrimitiveValue(value);
             objectMap.put(key, primitiveValue);
         }
@@ -126,7 +144,7 @@ public class SimpleObject implements ObjectContainer {
     }
 
     @Override
-    public ContainerFactory getFactory() {
+    public ContainerFactory getContainerFactory() {
         return SimpleJsonContainerFactory.getInstance();
     }
 

@@ -1,21 +1,16 @@
 package com.hancomins.jsn4j;
 
-public interface ContainerFactory {
+public interface ContainerFactory extends ContainerFactoryProvidable  {
     String getJsn4jModuleName();
 
     ObjectContainer newObject();
     ArrayContainer newArray();
 
-    default ObjectContainer newObject(ObjectContainer rootContainer) {
+
+    default ObjectContainer newObject(ContainerValue rootContainer) {
         return newObject();
     }
-    default ObjectContainer newObject(ArrayContainer rootContainer) {
-        return newObject();
-    }
-    default ArrayContainer newArray(ObjectContainer rootContainer) {
-        return newArray();
-    }
-    default ArrayContainer newArray(ArrayContainer rootContainer) {
+    default ArrayContainer newArray(ContainerValue rootContainer) {
         return newArray();
     }
 
@@ -51,5 +46,10 @@ public interface ContainerFactory {
 
 
     ContainerParser getParser();
+
+    @Override
+    default ContainerFactory getContainerFactory() {
+        return this;
+    }
 
 }

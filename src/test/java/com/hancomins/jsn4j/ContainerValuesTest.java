@@ -3,6 +3,8 @@ package com.hancomins.jsn4j;
 import com.hancomins.jsn4j.simple.SimpleJsonContainerFactory;
 import org.junit.jupiter.api.Test;
 
+import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ContainerValuesTest {
@@ -126,4 +128,68 @@ class ContainerValuesTest {
         assertEquals(1, result.size());
         assertEquals(new PrimitiveValue(1), result.get("version"));
     }
+
+
+
+
+    @Test
+    public void testMapToObjectContainer_nestedMapAndList() {
+        ContainerFactory factory = new SimpleJsonContainerFactory();
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("name", "JSN4J");
+        map.put("version", 1);
+
+        Map<String, Object> nestedMap = new LinkedHashMap<>();
+        nestedMap.put("enabled", true);
+        nestedMap.put("features", Arrays.asList("copy", "merge", "diff"));
+
+        map.put("config", nestedMap);
+
+        ObjectContainer result = ContainerValues.mapToObjectContainer(factory.newObject(), map);
+
+        assertEquals("JSN4J", result.get("name").raw());
+        assertEquals(1, result.get("version").raw());
+        assertTrue(result.get("config").isObject());
+
+        ObjectContainer config = result.get("config").asObject();
+        assertEquals(true, config.get("enabled").raw());
+
+        ArrayContainer features = config.get("features").asArray();
+        assertEquals(3, features.size());
+        assertEquals("copy", features.get(0).raw());
+        assertEquals("merge", features.get(1).raw());
+        assertEquals("diff", features.get(2).raw());
+    }
+
+    @Test
+    public void testCollectionToArrayContainer_withNestedCollectionsAndMaps() {
+        Map<String, Object> map1 = new HashMap<>();
+        map1.put("id", 1);
+        map1.put("name", "Item1");
+
+        Map<String, Object> map2 = new HashMap<>();
+        map2.put("id", 2);
+        map2.put("name", "Item2");
+
+        List<Object> innerList = new ArrayList<>();
+        innerList.add(map1);
+        innerList.add(map2);
+
+        List<Object> outerList = new ArrayList<>();
+        outerList.add("Start");
+        outerList.add(innerList);
+        outerList.add("End");
+
+        ArrayContainer arrayContainer = ContainerValues.collectionToArrayContainer(factory.newArray(), outerList);
+
+        assertEquals("Start", arrayContainer.get(0).raw());
+
+        ArrayContainer inner = arrayContainer.get(1).asArray();
+        assertEquals(2, inner.size());
+        assertEquals(1, inner.get(0).asObject().get("id").raw());
+        assertEquals("Item2", inner.get(1).asObject().get("name").raw());
+
+        assertEquals("End", arrayContainer.get(2).raw());
+    }
+
 }
