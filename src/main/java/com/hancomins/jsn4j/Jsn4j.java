@@ -195,7 +195,7 @@ public class Jsn4j {
         return defaultContainerFactory;
     }
 
-    public static ContainerFactory getContainerFactory(String name) {
+    public static ContainerFactory getContainerFactoryByName(String name) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("ContainerFactory name cannot be null or empty");
         }
@@ -204,6 +204,27 @@ public class Jsn4j {
             throw new IllegalArgumentException("ContainerFactory not found: " + name);
         }
         return factory;
+    }
+
+    public static ContainerFactory getContainerFactoryByClass(Class<? extends ContainerFactory> factoryClass) {
+        if (factoryClass == null) {
+            throw new IllegalArgumentException("ContainerFactory class cannot be null");
+        }
+        ContainerFactory factory = classContainerFactories.get(factoryClass);
+        if (factory == null) {
+            throw new IllegalArgumentException("ContainerFactory not found: " + factoryClass.getName());
+        }
+        return factory;
+    }
+
+    public static ContainerFactory getContainerFactoryByClassName(String className) {
+        java.util.Map.Entry<Class<? extends ContainerFactory>, ContainerFactory> resultEntry  = classContainerFactories.entrySet().stream().filter(entry -> entry.getValue().getClass().getName().equals(className)).findFirst().orElse(null);
+        if (resultEntry != null) {
+            return resultEntry.getValue();
+        } else {
+            throw new IllegalArgumentException("ContainerFactory not found: " + className);
+        }
+
     }
 
 
@@ -216,27 +237,27 @@ public class Jsn4j {
 
     public static ObjectContainer newObject(ObjectContainer rootContainer) {
         if (rootContainer == null) {
-            throw new IllegalArgumentException("Root container cannot be null");
+            return defaultContainerFactory.newObject();
         }
         return defaultContainerFactory.newObject(rootContainer);
     }
     public static ObjectContainer newObject(ArrayContainer rootContainer) {
         if (rootContainer == null) {
-            throw new IllegalArgumentException("Root container cannot be null");
+            return defaultContainerFactory.newObject();
         }
         return defaultContainerFactory.newObject(rootContainer);
     }
 
     public static ArrayContainer newArray(ObjectContainer rootContainer) {
         if (rootContainer == null) {
-            throw new IllegalArgumentException("Root container cannot be null");
+            return defaultContainerFactory.newArray();
         }
         return defaultContainerFactory.newArray(rootContainer);
     }
 
     public static ArrayContainer newArray(ArrayContainer rootContainer) {
         if (rootContainer == null) {
-            throw new IllegalArgumentException("Root container cannot be null");
+            return defaultContainerFactory.newArray();
         }
         return defaultContainerFactory.newArray(rootContainer);
     }
