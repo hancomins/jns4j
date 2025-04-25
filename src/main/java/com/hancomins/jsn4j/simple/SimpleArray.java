@@ -136,4 +136,9 @@ public class SimpleArray implements ArrayContainer {
         }
         return ContainerValues.equals(this, (ContainerValue) o);
     }
+
+    @Override
+    public String toString() {
+        return getWriter().write();
+    }
 }

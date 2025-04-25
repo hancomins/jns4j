@@ -63,4 +63,27 @@ public class SimpleJsonParserTest {
         assertEquals("\"\\/\b\f\n\r\t", obj.getString("escapeTest"));
 
     }
+
+    @Test
+    public void testJSONArray() {
+        String jsonArray = "[1, 2, 3, {\"a\": true}, [null, \"end\"]]";
+        ContainerParser parser = new SimpleJsonParser();
+        ContainerValue result = parser.parse(new StringReader(jsonArray));
+
+        assertTrue(result.isArray());
+        ArrayContainer arr = result.asArray();
+
+        assertEquals(1, arr.getInt(0));
+        assertEquals(2, arr.getInt(1));
+        assertEquals(3, arr.getInt(2));
+        assertTrue(arr.get(3).isObject());
+        assertTrue(arr.getObject(3).getBoolean("a"));
+
+        ArrayContainer innerArr = arr.getArray(4);
+        assertTrue(innerArr.get(0).isNull());
+        assertEquals("end", innerArr.getString(1));
+
+        System.out.println(arr.toString());
+
+    }
 }
