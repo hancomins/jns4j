@@ -319,18 +319,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     }
 
-    default <T> T toTypeObject(Class<? extends T> type) {
-        throw new UnsupportedOperationException("toTypeObject() is not supported for this container");
-    }
-
-    default <T> T toTypeObject(TypeReferenceProvider<T> type) {
-        throw new UnsupportedOperationException("toTypeObject() is not supported for this container");
-    }
-
-
-
     void clear();
-
 
 
     default ObjectContainer putCopy(String key, ObjectContainer source) {

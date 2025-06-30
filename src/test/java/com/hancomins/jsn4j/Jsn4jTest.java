@@ -1,7 +1,5 @@
 package com.hancomins.jsn4j;
 
-import com.hancomins.jsn4j.simple.SimpleJsonWriteOption;
-import com.hancomins.jsn4j.simple.SimpleJsonWriter;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,7 +19,7 @@ class Jsn4jTest {
         System.out.println(container);
 
         String prettyJson = container.toString();
-
+        System.out.println(prettyJson);
 
     }
 

@@ -10,6 +10,7 @@ public class PrimitiveValue implements ContainerValue {
 
     protected final Object raw;
 
+    @SuppressWarnings("unused")
     protected PrimitiveValue() {
         this.raw = null;
     }
@@ -188,6 +189,7 @@ public class PrimitiveValue implements ContainerValue {
 
     // ---- 불리언 ----
 
+    @SuppressWarnings("DuplicatedCode")
     public boolean asBoolean() {
         if (raw instanceof Boolean) return (boolean) raw;
         if (raw instanceof Number) return ((Number) raw).intValue() > 0;
@@ -202,9 +204,30 @@ public class PrimitiveValue implements ContainerValue {
         return false;
     }
 
-    public boolean asBooleanOr(boolean defaultValue) {
-        return asBoolean() || defaultValue;
 
+    @SuppressWarnings("DuplicatedCode")
+    private Boolean asBooleanBox() {
+        if (raw instanceof Boolean) return (boolean) raw;
+        if (raw instanceof Number) return ((Number) raw).intValue() > 0;
+        if (raw instanceof String) {
+            String str = (String) raw;
+            return str.equalsIgnoreCase("true") || str.equals("1");
+        }
+        if (raw instanceof byte[]) {
+            byte[] bytes = (byte[]) raw;
+            return bytes.length > 0 && bytes[0] != 0;
+        }
+        return null;
+    }
+
+
+    public boolean asBooleanOr(boolean defaultValue) {
+        Boolean value = asBooleanBox();
+        if (value != null) {
+            return value;
+        } else {
+            return defaultValue;
+        }
     }
 
     // ---- 문자열 ----

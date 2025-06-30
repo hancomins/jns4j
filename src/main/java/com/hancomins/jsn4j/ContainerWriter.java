@@ -21,5 +21,4 @@ public interface ContainerWriter<E extends Enum<E>> {
     void write(OutputStream outputStream) throws IOException;
 
 
-
 }

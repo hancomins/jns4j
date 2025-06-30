@@ -335,12 +335,14 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
         return list;
     }
 
-    default <T> List<T> toTypeObjectArray(Class<? extends T> type) {
-        throw new UnsupportedOperationException("toTypeObjectArray() is not supported for this container");
-    }
-
-    default <T> List<T> toTypeObjectArray(TypeReferenceProvider<? extends T> type) {
-        throw new UnsupportedOperationException("toTypeObjectArray() is not supported for this container");
+    default List<ContainerValue> toList() {
+        int size = size();
+        List<ContainerValue> list = new java.util.ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
+            ContainerValue value = get(i);
+            list.add(value);
+        }
+        return list;
     }
 
     void clear();
