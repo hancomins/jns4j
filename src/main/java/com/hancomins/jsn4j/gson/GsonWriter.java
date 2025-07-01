@@ -15,7 +15,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class GsonWriter implements ContainerWriter<GsonWriteOption> {
     
@@ -83,6 +82,7 @@ public class GsonWriter implements ContainerWriter<GsonWriteOption> {
     /**
      * 옵션에 따라 Gson 인스턴스를 구성
      */
+    @SuppressWarnings("StatementWithEmptyBody")
     private Gson buildGson() {
         GsonBuilder builder = new GsonBuilder();
         
@@ -171,6 +171,7 @@ public class GsonWriter implements ContainerWriter<GsonWriteOption> {
     /**
      * enable 헬퍼 메서드 - 편의를 위해 제공
      */
+    @SuppressWarnings("unused")
     public GsonWriter enable(GsonWriteOption... options) {
         for (GsonWriteOption option : options) {
             putOption(option, true);
@@ -181,6 +182,7 @@ public class GsonWriter implements ContainerWriter<GsonWriteOption> {
     /**
      * disable 헬퍼 메서드 - 편의를 위해 제공
      */
+    @SuppressWarnings("unused")
     public GsonWriter disable(GsonWriteOption... options) {
         for (GsonWriteOption option : options) {
             removeOption(option);

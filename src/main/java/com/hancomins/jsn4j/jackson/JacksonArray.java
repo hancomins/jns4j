@@ -48,15 +48,15 @@ public class JacksonArray extends AbstractJacksonContainer implements ArrayConta
         } else if (value instanceof ContainerValue) {
             node.set(index, toJsonNode((ContainerValue) value));
         } else if (value instanceof Collection) {
-            ArrayContainer array = new JacksonArray(mapper);
+            JacksonArray array = new JacksonArray(mapper);
             for (Object item : (Collection<?>) value) {
                 array.put(item);
             }
-            node.set(index, ((JacksonArray) array).getArrayNode());
+            node.set(index, array.getArrayNode());
         } else if (value instanceof Map) {
-            ObjectContainer object = new JacksonObject(mapper);
+            JacksonObject object = new JacksonObject(mapper);
             ((Map<?, ?>) value).forEach((k, v) -> object.put(String.valueOf(k), v));
-            node.set(index, ((JacksonObject) object).getObjectNode());
+            node.set(index, object.getObjectNode());
         } else {
             node.set(index, mapper.valueToTree(value));
         }
@@ -70,15 +70,15 @@ public class JacksonArray extends AbstractJacksonContainer implements ArrayConta
         } else if (value instanceof ContainerValue) {
             node.add(toJsonNode((ContainerValue) value));
         } else if (value instanceof Collection) {
-            ArrayContainer array = new JacksonArray(mapper);
+            JacksonArray array = new JacksonArray(mapper);
             for (Object item : (Collection<?>) value) {
                 array.put(item);
             }
-            node.add(((JacksonArray) array).getArrayNode());
+            node.add(array.getArrayNode());
         } else if (value instanceof Map) {
-            ObjectContainer object = new JacksonObject(mapper);
+            JacksonObject object = new JacksonObject(mapper);
             ((Map<?, ?>) value).forEach((k, v) -> object.put(String.valueOf(k), v));
-            node.add(((JacksonObject) object).getObjectNode());
+            node.add(object.getObjectNode());
         } else {
             node.add(mapper.valueToTree(value));
         }

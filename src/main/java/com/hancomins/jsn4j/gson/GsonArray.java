@@ -138,7 +138,7 @@ public class GsonArray extends AbstractGsonContainer implements ArrayContainer {
     @Override
     public void clear() {
         // Gson JsonArray doesn't have a clear method, so we need to remove all elements
-        while (jsonArray.size() > 0) {
+        while (!jsonArray.isEmpty()) {
             jsonArray.remove(0);
         }
     }

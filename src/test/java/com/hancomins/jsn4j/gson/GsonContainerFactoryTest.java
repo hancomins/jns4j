@@ -25,7 +25,7 @@ public class GsonContainerFactoryTest {
         GsonContainerFactory factory = GsonContainerFactory.getInstance();
         ObjectContainer obj = factory.newObject();
         assertNotNull(obj);
-        assertTrue(obj instanceof GsonObject);
+        assertInstanceOf(GsonObject.class, obj);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class GsonContainerFactoryTest {
         GsonContainerFactory factory = GsonContainerFactory.getInstance();
         ArrayContainer arr = factory.newArray();
         assertNotNull(arr);
-        assertTrue(arr instanceof GsonArray);
+        assertInstanceOf(GsonArray.class, arr);
     }
 
     @Test
@@ -62,7 +62,7 @@ public class GsonContainerFactoryTest {
         assertEquals(3, wrapped.asArray().size());
         assertEquals("item1", wrapped.asArray().getString(0));
         assertEquals(42, wrapped.asArray().getInt(1));
-        assertEquals(true, wrapped.asArray().getBoolean(2));
+        assertTrue(wrapped.asArray().getBoolean(2));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class GsonContainerFactoryTest {
         obj.put("test", "value");
         
         ContainerWriter<? extends Enum<?>> writer = obj.getWriter();
-        assertTrue(writer instanceof GsonWriter);
+        assertInstanceOf(GsonWriter.class, writer);
         
         String json = writer.write();
         assertNotNull(json);

@@ -8,13 +8,19 @@ import com.hancomins.jsn4j.ContainerParser;
 import com.hancomins.jsn4j.ContainerValue;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class GsonParser implements ContainerParser {
-    
+
+    @SuppressWarnings("unused")
     private final Gson gson;
-    
+
     public GsonParser(Gson gson) {
         this.gson = gson;
+    }
+
+    public Gson getGson() {
+        return gson;
     }
     
     @Override
@@ -51,7 +57,7 @@ public class GsonParser implements ContainerParser {
             return null;
         }
         
-        try (Reader reader = new InputStreamReader(inputStream, "UTF-8")) {
+        try (Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
             return parse(reader);
         } catch (IOException e) {
             throw new RuntimeException("Failed to read input stream: " + e.getMessage(), e);

@@ -25,7 +25,7 @@ public class GsonTest {
     public void testObjectCreation() {
         ObjectContainer obj = factory.newObject();
         assertNotNull(obj);
-        assertTrue(obj instanceof GsonObject);
+        assertInstanceOf(GsonObject.class, obj);
         assertEquals(0, obj.size());
     }
     
@@ -33,7 +33,7 @@ public class GsonTest {
     public void testArrayCreation() {
         ArrayContainer arr = factory.newArray();
         assertNotNull(arr);
-        assertTrue(arr instanceof GsonArray);
+        assertInstanceOf(GsonArray.class, arr);
         assertEquals(0, arr.size());
     }
     
@@ -153,7 +153,7 @@ public class GsonTest {
         
         // Gson serializes byte arrays as base64
         String json = obj.getWriter().write();
-        // Gson may escape the = sign as \u003d
+        // Gson may escape the = sign as
         assertTrue(json.contains("AQIDBAU=") || json.contains("AQIDBAU\\u003d")); // Base64 of [1,2,3,4,5]
     }
     
