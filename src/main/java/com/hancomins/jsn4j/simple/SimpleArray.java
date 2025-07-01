@@ -4,9 +4,8 @@ import com.hancomins.jsn4j.*;
 
 import java.util.*;
 
-public class SimpleArray implements ArrayContainer {
+public class SimpleArray extends AbstractSimpleContainer implements ArrayContainer {
     private final ArrayList<ContainerValue> values;
-    private SimpleJsonWriter jsonWriter;
 
     public SimpleArray() {
         this.values = new ArrayList<>();
@@ -22,22 +21,8 @@ public class SimpleArray implements ArrayContainer {
 
     @Override
     public ArrayContainer put(int index, Object value) {
-        if(value instanceof ContainerValue) {
-            ensure(index + 1);
-            values.set(index, (ContainerValue)value);
-            return this;
-        } else if(value instanceof Collection) {
-            ensure(index + 1);
-            values.set(index,ContainerValues.collectionToArrayContainer(this, (Collection<?>)value));
-            return this;
-        } else if(value instanceof Map) {
-            ensure(index + 1);
-            values.set(index,ContainerValues.mapToObjectContainer(this, (Map<?,?>)value));
-            return this;
-        }
-        PrimitiveValue containerValue = new PrimitiveValue(value);
         ensure(index + 1);
-        values.set(index, containerValue);
+        values.set(index, convertValue(value));
         return this;
     }
 
@@ -54,16 +39,7 @@ public class SimpleArray implements ArrayContainer {
 
     @Override
     public ArrayContainer put(Object value) {
-        if(value instanceof ContainerValue) {
-            values.add((ContainerValue)value);
-            return this;
-        } else if(value instanceof Collection) {
-            values.add(ContainerValues.collectionToArrayContainer(this, (Collection<?>)value));
-        } else if(value instanceof Map) {
-            values.add(ContainerValues.mapToObjectContainer(this, (Map<?,?>)value));
-        }
-        PrimitiveValue containerValue = new PrimitiveValue(value);
-        values.add(containerValue);
+        values.add(convertValue(value));
         return this;
     }
 
@@ -107,38 +83,12 @@ public class SimpleArray implements ArrayContainer {
     }
 
     @Override
-    public ContainerFactory getContainerFactory() {
-        return SimpleJsonContainerFactory.getInstance();
-    }
-
-    @Override
     public ValueType getValueType() {
         return ValueType.ARRAY;
     }
 
     @Override
-    public ContainerWriter<? extends Enum<?>> getWriter() {
-        if(jsonWriter == null) {
-            jsonWriter = new SimpleJsonWriter(this);
-        }
-        return jsonWriter;
-    }
-
-    @Override
     public Iterator<ContainerValue> iterator() {
         return values.iterator();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if(!(o instanceof ContainerValue)) {
-            return false;
-        }
-        return ContainerValues.equals(this, (ContainerValue) o);
-    }
-
-    @Override
-    public String toString() {
-        return getWriter().write();
     }
 }

@@ -4,13 +4,11 @@ import com.hancomins.jsn4j.*;
 
 import java.util.*;
 
-public class SimpleObject implements ObjectContainer {
+public class SimpleObject extends AbstractSimpleContainer implements ObjectContainer {
 
 
 
     private final HashMap<String, ContainerValue> objectMap;
-    private SimpleJsonWriter jsonWriter;
-
 
     public SimpleObject() {
         this.objectMap = new HashMap<>();
@@ -33,17 +31,7 @@ public class SimpleObject implements ObjectContainer {
 
     @Override
     public ObjectContainer put(String key, Object value) {
-        if (value instanceof ContainerValue) {
-            objectMap.put(key, (ContainerValue) value);
-        } else if(value instanceof Collection) {
-            objectMap.put(key, ContainerValues.collectionToArrayContainer(this, (Collection<?>) value));
-        } else if(value instanceof Map) {
-            objectMap.put(key, ContainerValues.mapToObjectContainer(this, (Map<?, ?>) value));
-        }
-        else {
-            PrimitiveValue primitiveValue = new PrimitiveValue(value);
-            objectMap.put(key, primitiveValue);
-        }
+        objectMap.put(key, convertValue(value));
         return this;
     }
 
@@ -120,41 +108,8 @@ public class SimpleObject implements ObjectContainer {
     }
 
     @Override
-    public Object raw() {
-        return this;
-    }
-
-    @Override
-    public ContainerWriter<? extends Enum<?>> getWriter() {
-        if(jsonWriter == null) {
-            jsonWriter = new SimpleJsonWriter(this);
-        }
-        return jsonWriter;
-    }
-
-    @Override
     public Iterator<Map.Entry<String, ContainerValue>> iterator() {
         return objectMap.entrySet().iterator();
-    }
-
-
-    @Override
-    public String toString() {
-        return getWriter().write();
-    }
-
-    @Override
-    public ContainerFactory getContainerFactory() {
-        return SimpleJsonContainerFactory.getInstance();
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if(!(o instanceof ContainerValue)) {
-            return false;
-        }
-        return ContainerValues.equals(this, (ContainerValue) o);
     }
 
 

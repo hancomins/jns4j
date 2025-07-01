@@ -8,20 +8,18 @@ import com.hancomins.jsn4j.*;
 
 import java.util.*;
 
-public class JacksonObject implements ObjectContainer {
+public class JacksonObject extends AbstractJacksonContainer implements ObjectContainer {
     
     private final ObjectNode node;
-    private final ObjectMapper mapper;
-    private JacksonWriter writer;
     
     public JacksonObject(ObjectMapper mapper) {
-        this.mapper = mapper;
+        super(mapper);
         this.node = mapper.createObjectNode();
     }
     
     public JacksonObject(ObjectNode node, ObjectMapper mapper) {
+        super(mapper);
         this.node = node;
-        this.mapper = mapper;
     }
     
     /**
@@ -156,18 +154,8 @@ public class JacksonObject implements ObjectContainer {
     }
     
     @Override
-    public ContainerFactory getContainerFactory() {
-        return JacksonContainerFactory.getInstance();
-    }
-    
-    @Override
     public ValueType getValueType() {
         return ValueType.OBJECT;
-    }
-    
-    @Override
-    public Object raw() {
-        return this;
     }
     
     @Override
@@ -184,79 +172,7 @@ public class JacksonObject implements ObjectContainer {
     }
     
     @Override
-    public String toString() {
-        return getWriter().write();
-    }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ContainerValue)) {
-            return false;
-        }
-        return ContainerValues.equals(this, (ContainerValue) o);
-    }
-    
-    @Override
     public int hashCode() {
         return node.hashCode();
-    }
-    
-    /**
-     * ContainerValue를 JsonNode로 변환
-     */
-    private JsonNode toJsonNode(ContainerValue value) {
-        if (value == null || value.isNull()) {
-            return node.nullNode();
-        } else if (value.isPrimitive()) {
-            return primitiveToJsonNode((PrimitiveValue) value);
-        } else if (value instanceof JacksonObject) {
-            return ((JacksonObject) value).node;
-        } else if (value instanceof JacksonArray) {
-            return ((JacksonArray) value).getArrayNode();
-        } else if (value.isObject()) {
-            // 다른 구현체의 ObjectContainer 변환
-            ObjectNode objectNode = mapper.createObjectNode();
-            ObjectContainer obj = value.asObject();
-            for (Map.Entry<String, ContainerValue> entry : obj) {
-                objectNode.set(entry.getKey(), toJsonNode(entry.getValue()));
-            }
-            return objectNode;
-        } else if (value.isArray()) {
-            // 다른 구현체의 ArrayContainer 변환
-            ArrayNode arrayNode = mapper.createArrayNode();
-            ArrayContainer arr = value.asArray();
-            for (ContainerValue item : arr) {
-                arrayNode.add(toJsonNode(item));
-            }
-            return arrayNode;
-        }
-        return mapper.valueToTree(value.raw());
-    }
-    
-    /**
-     * PrimitiveValue를 JsonNode로 변환
-     */
-    private JsonNode primitiveToJsonNode(PrimitiveValue value) {
-        Object raw = value.raw();
-        if (raw == null) {
-            return node.nullNode();
-        } else if (raw instanceof String) {
-            return node.textNode((String) raw);
-        } else if (raw instanceof Integer) {
-            return node.numberNode((Integer) raw);
-        } else if (raw instanceof Long) {
-            return node.numberNode((Long) raw);
-        } else if (raw instanceof Float) {
-            return node.numberNode((Float) raw);
-        } else if (raw instanceof Double) {
-            return node.numberNode((Double) raw);
-        } else if (raw instanceof Boolean) {
-            return node.booleanNode((Boolean) raw);
-        } else if (raw instanceof byte[]) {
-            return node.binaryNode((byte[]) raw);
-        } else if (raw instanceof Number) {
-            return mapper.valueToTree(raw);
-        }
-        return node.textNode(String.valueOf(raw));
     }
 }
