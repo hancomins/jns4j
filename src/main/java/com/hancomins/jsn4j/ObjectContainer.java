@@ -162,6 +162,28 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     // ---- 숫자형 ----
 
+    default short getShort(String key) {
+        ContainerValue ContainerValue = get(key);
+        if(ContainerValue == null) {
+            return Short.MIN_VALUE;
+        } else if(ContainerValue.isPrimitive()) {
+            return ((PrimitiveValue)ContainerValue).asShort();
+        } else {
+            return Short.MIN_VALUE;
+        }
+    }
+
+    default short getShort(String key, short defaultValue) {
+        ContainerValue ContainerValue = get(key);
+        if(ContainerValue == null) {
+            return defaultValue;
+        } else if(ContainerValue.isPrimitive()) {
+            return ((PrimitiveValue)ContainerValue).asShortOr(defaultValue);
+        } else {
+            return defaultValue;
+        }
+    }
+
     default int getInt(String key) {
         ContainerValue ContainerValue = get(key);
         if(ContainerValue == null) {

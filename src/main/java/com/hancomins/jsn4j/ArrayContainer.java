@@ -1,9 +1,10 @@
 package com.hancomins.jsn4j;
 
 
+import java.util.Collection;
 import java.util.List;
 
-@SuppressWarnings("UnusedReturnValue")
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>, ContainerFactoryProvidable {
 
 
@@ -38,6 +39,16 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
 
     ArrayContainer put(Object value);
+
+    default ArrayContainer putAll(Collection<?> value) {
+        if (value == null) {
+            return this;
+        }
+        for (Object item : value) {
+            put(item);
+        }
+        return this;
+    }
 
 
     default ArrayContainer put(char value) {
@@ -171,6 +182,30 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
 
     // ---- 숫자형 ----
+
+    default short getShort(int index) {
+        ContainerValue value = get(index);
+        if (value == null) {
+            return Short.MIN_VALUE;
+        }
+        if (value instanceof PrimitiveValue) {
+            return ((PrimitiveValue) value).asShort();
+        } else {
+            return Short.MIN_VALUE;
+        }
+    }
+
+    default short getShort(int index, short defaultValue) {
+        ContainerValue value = get(index);
+        if (value == null) {
+            return defaultValue;
+        }
+        if (value instanceof PrimitiveValue) {
+            return ((PrimitiveValue) value).asShortOr(defaultValue);
+        } else {
+            return defaultValue;
+        }
+    }
 
     default int getInt(int index) {
         ContainerValue value = get(index);

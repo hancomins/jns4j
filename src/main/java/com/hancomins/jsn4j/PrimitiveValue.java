@@ -45,6 +45,32 @@ public class PrimitiveValue implements ContainerValue {
 
 
 
+    public short asShort() {
+        if(raw instanceof Short) {
+            return (short) raw;
+        } else if(raw instanceof Number) {
+            return ((Number) raw).shortValue();
+        } else if(raw instanceof String) {
+            try {
+                return Short.parseShort((String) raw);
+            } catch (NumberFormatException e) {
+                return Short.MIN_VALUE;
+            }
+        } else if(raw instanceof byte[]) {
+            return (short) bufferToInt((byte[]) raw);
+        } else {
+            return Short.MIN_VALUE;
+        }
+    }
+
+    public short asShortOr(short defaultValue) {
+        short value = asShort();
+        if (value != Short.MIN_VALUE) {
+            return value;
+        } else {
+            return defaultValue;
+        }
+    }
 
     public int asInt() {
         if(raw instanceof Integer) {
