@@ -3,7 +3,7 @@ package com.hancomins.jsn4j;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings("UnusedReturnValue")
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<String, ContainerValue>>, ContainerFactoryProvidable {
 
     int size();
@@ -282,6 +282,27 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
             return null;
         }
     }
+
+    default ObjectContainer getObject(String key, ObjectContainer defaultValue) {
+        ContainerValue ContainerValue = get(key);
+        if(ContainerValue == null) {
+            return defaultValue;
+        } else if(ContainerValue.isObject()) {
+            return (ObjectContainer) ContainerValue;
+        } else {
+            return defaultValue;
+        }
+    }
+
+    default ObjectContainer getObjectOrNew(String key) {
+        ObjectContainer objectContainer = getObject(key);
+        if(objectContainer == null) {
+            objectContainer = this.newAndPutObject(key);
+        }
+        return objectContainer;
+    }
+
+
     default ArrayContainer getArray(String key) {
         ContainerValue ContainerValue = get(key);
         if(ContainerValue == null) {
@@ -291,6 +312,25 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
         } else {
             return null;
         }
+    }
+
+    default ArrayContainer getArray(String key, ArrayContainer defaultValue) {
+        ContainerValue ContainerValue = get(key);
+        if(ContainerValue == null) {
+            return defaultValue;
+        } else if(ContainerValue.isArray()) {
+            return (ArrayContainer) ContainerValue;
+        } else {
+            return defaultValue;
+        }
+    }
+
+    default ArrayContainer getArrayOrNew(String key) {
+        ArrayContainer arrayContainer = getArray(key);
+        if(arrayContainer == null) {
+            arrayContainer = this.newAndPutArray(key);
+        }
+        return arrayContainer;
     }
 
     default Object getRaw(String key) {

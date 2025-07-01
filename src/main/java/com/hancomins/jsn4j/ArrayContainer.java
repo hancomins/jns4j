@@ -39,6 +39,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     ArrayContainer put(Object value);
 
+
     default ArrayContainer put(char value) {
         return put(getContainerFactory().newPrimitive(value));
     }
@@ -301,12 +302,53 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
         }
     }
 
+    default ObjectContainer getObject(int index, ObjectContainer defaultValue) {
+        ContainerValue value = get(index);
+        if (value instanceof ObjectContainer) {
+            return (ObjectContainer) value;
+        } else {
+            return defaultValue;
+        }
+    }
+
+    default ObjectContainer getObjectOrNew(int index) {
+        ContainerValue value = get(index);
+        if (value instanceof ObjectContainer) {
+            return (ObjectContainer) value;
+        } else {
+            ObjectContainer newObject = newAndPutObject();
+            put(index, newObject);
+            return newObject;
+        }
+    }
+
+
     default ArrayContainer getArray(int index) {
         ContainerValue value = get(index);
         if (value instanceof ArrayContainer) {
             return (ArrayContainer) value;
         } else {
             return null;
+        }
+    }
+
+    default ArrayContainer getArray(int index, ArrayContainer defaultValue) {
+        ContainerValue value = get(index);
+        if (value instanceof ArrayContainer) {
+            return (ArrayContainer) value;
+        } else {
+            return defaultValue;
+        }
+    }
+
+    default ArrayContainer getArrayOrNew(int index) {
+        ContainerValue value = get(index);
+        if (value instanceof ArrayContainer) {
+            return (ArrayContainer) value;
+        } else {
+            ArrayContainer newArray = newAndPutArray();
+            put(index, newArray);
+            return newArray;
         }
     }
 
