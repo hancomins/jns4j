@@ -1,13 +1,35 @@
+buildscript {
+    dependencies {
+        classpath 'org.bouncycastle:bcpg-jdk15on:1.70'
+        def path = new File("${projectDir}/libs-build").getCanonicalFile().getAbsolutePath();
+        classpath fileTree(dir:path, include: ['*.jar'])
+    }
+}
+import com.hancomins.util.JarSign
+import com.hancomins.util.PomBuilder
+
 plugins {
     id 'java'
 }
 
-group = 'com.hancomins.jsn4j'
-// 프로퍼티의 version을 읽어오고 없으면 0.0으로 설정
-version =  project.hasProperty("version") ? project.property("version") : "0.0"
+apply from: 'publish.gradle'
+
+group = PUBLISH_GROUP_ID
+version = PUBLISH_VERSION
+
 
 repositories {
     mavenCentral()
+}
+def JAVA_VERSION = 1.8
+def signPropsFilePath =  getAbsolutePath("${projectDir}/sign.properties");
+Properties signProperties = new Properties()
+if (file(signPropsFilePath).exists()) {
+    try(InputStream inputStream = new FileInputStream(signPropsFilePath)) {
+        signProperties.load(inputStream)
+    }
+    String keyRingFilePath = getAbsolutePath(signProperties.getProperty(JarSign.PROPERTY_KEY_SECRET_KEY_RING_FILE, ''))
+    signProperties.setProperty(JarSign.PROPERTY_KEY_SECRET_KEY_RING_FILE, keyRingFilePath);
 }
 
 // java8 기반
@@ -24,7 +46,7 @@ dependencies {
     // org.json 의존성 (선택적 의존성)
     compileOnly 'org.json:json:20231013'
     
-    // JSON5 의존성 (선택적 의존성)
+    // jsn4j 의존성 (선택적 의존성)
     compileOnly 'io.github.hancomins:json5:1.1.1'
 
     // Gson 의존성 (선택적 의존성)
@@ -43,3 +65,204 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+
+
+
+
+task jarJavadoc(type: Jar, dependsOn: javadoc) {
+    group = 'build'
+    archiveBaseName.set("jsn4j")
+    from javadoc.destinationDir
+    archiveClassifier.set('javadoc') // Gradle 6.4 이상에서는 이 방법을 사용
+
+
+    manifest {
+        attributes(
+                'Implementation-Title': ':jsn4j',       // 프로젝트 제목
+                'Implementation-Version': project.version,          // 프로젝트 버전
+                'Implementation-Vendor': 'HANCOM INNOSTREAM',      // 제작자 또는 회사 이름
+                'Built-By': 'Sungbeom HONG', // 빌드한 사람
+                'Created-By': "Gradle ${gradle.gradleVersion}"  // Gradle 버전
+        )
+    }
+
+    from('LICENSE') {
+        into('/')
+    }
+
+    doLast {
+        def jarFilePath = archiveFile.get().asFile.path
+        JarSign.sign(jarFilePath, signProperties);
+    }
+}
+
+task jarSources(type: Jar) {
+    group = 'build'
+    archiveBaseName.set("jsn4j")
+    from sourceSets.main.allSource
+    archiveClassifier.set('sources') // Gradle 6.4 이상에서는 이 방법을 사용
+
+
+    manifest {
+        attributes(
+                'Implementation-Title': ':jsn4j',       // 프로젝트 제목
+                'Implementation-Version': project.version,          // 프로젝트 버전
+                'Implementation-Vendor': 'HANCOM INNOSTREAM',      // 제작자 또는 회사 이름
+                'Built-By': 'Sungbeom HONG', // 빌드한 사람
+                'Build-Jdk': "${JAVA_VERSION}", // JDK 버전
+                'Created-By': "Gradle ${gradle.gradleVersion}"  // Gradle 버전
+        )
+    }
+
+    from('LICENSE') {
+        into('/')
+    }
+
+    doLast {
+        def jarFilePath = archiveFile.get().asFile.path
+        JarSign.sign(jarFilePath, signProperties);
+    }
+}
+
+
+task makePom {
+    group = 'build'
+    doLast {
+        def pomFilePath = "${buildDir}/libs/jsn4j-${version}.pom"
+
+        PomBuilder.builder()
+        PomBuilder.Developer developer = PomBuilder.newDeveloper("Sungbeom Hong")
+                .setEmail("ice3x2@hancomins.com")
+                .setOrganization("HANCOM INNOSTREAM")
+                .setOrganizationUrl("https://github.com/hancomins").setId("ice3x2");
+
+        PomBuilder.SCM scm = PomBuilder.newSCM("hancomins/jsn4j");
+
+        PomBuilder.builder().setGroupId("io.github.hancomins")
+                .setArtifactId("jsn4j")
+                .setVersion("${version}")
+                .setName("jsn4j")
+                .setUrl("https://github.com/hancomins/jsn4j")
+                .setDescription("A jsn4j library for configuration files. Supports comments.")
+                .addDeveloper(developer)
+                .setScm(scm)
+                .writeFile(pomFilePath);
+
+        JarSign.sign(pomFilePath, signProperties);
+    }
+}
+
+
+task dist() {
+    group = 'distribution'
+    dependsOn build
+    dependsOn makePom
+    doLast {
+        def sourceDir = new File("${buildDir}/libs")
+        def targetDir = new File("${buildDir}/dist/io/github/hancomins/jsn4j/${version}")
+        def zipFile = new File("${buildDir}/dist/jsn4j-${version}.zip")
+
+        // 1. 대상 디렉토리 생성
+        if (!targetDir.exists()) {
+            targetDir.mkdirs()
+        }
+
+        // 2. 파일 복사
+        sourceDir.eachFile { file ->
+            def destFile = new File(targetDir, file.name)
+            file.withInputStream { is ->
+                destFile.withOutputStream { os ->
+                    os << is
+                }
+            }
+        }
+
+        // 3. 파일 압축
+        zipFile.withOutputStream { fos ->
+            new java.util.zip.ZipOutputStream(fos).withCloseable { zos ->
+                targetDir.eachFileRecurse { file ->
+                    if (file.isFile()) {
+                        def relativePath = file.path.replace(targetDir.path + File.separator, "")
+                        def entryName = "io/github/hancomins/jsn4j/${version}/" + relativePath
+                        zos.putNextEntry(new java.util.zip.ZipEntry(entryName))
+                        file.withInputStream { fis ->
+                            zos << fis
+                        }
+                        zos.closeEntry()
+                    }
+                }
+            }
+        }
+
+        println "Files from ${sourceDir} copied to ${targetDir} and zipped into ${zipFile}"
+
+
+    }
+}
+
+
+
+build.dependsOn(jarJavadoc)
+build.dependsOn(jarSources)
+
+
+
+
+javadoc {
+    source = sourceSets.main.allJava
+    def includes = ['com/hancomins/jsn4j/*']
+
+    include includes
+
+    destinationDir = file("$buildDir/docs/javadoc")
+
+    // 문서 생성 시 사용될 옵션 (선택 사항)
+    options {
+        encoding 'UTF-8'
+        charSet 'UTF-8'
+        author true
+        version true
+    }
+}
+
+
+jar {
+    group = 'build'
+    archiveBaseName.set("jsn4j")
+
+    manifest {
+        attributes(
+                'Implementation-Title': 'jsn4j',       // 프로젝트 제목
+                'Implementation-Version': project.version,          // 프로젝트 버전
+                'Implementation-Vendor': 'HANCOM INNOSTREAM',      // 제작자 또는 회사 이름
+                'Built-By': 'Sungbeom HONG', // 빌드한 사람
+                'Build-Jdk': "${JAVA_VERSION}", // JDK 버전
+                'Created-By': "Gradle ${gradle.gradleVersion}"  // Gradle 버전
+        )
+    }
+
+    from('LICENSE') {
+        into('/')
+    }
+
+    doLast {
+        def jarFilePath = archiveFile.get().asFile.path
+        JarSign.sign(jarFilePath, signProperties);
+    }
+}
+
+
+
+String getAbsolutePath(String path) {
+    if (path.startsWith("/") || path.matches("^[a-zA-Z]:.*")) {
+        return file(path).getCanonicalFile().getAbsolutePath();
+    } else {
+        return file("${rootDir}/${path}").getCanonicalFile().getAbsolutePath();
+    }
+}
+
+
+
+
+

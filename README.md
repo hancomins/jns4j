@@ -22,6 +22,23 @@ JSN4J는 JSON 데이터를 다루기 위한 4가지 핵심 인터페이스를 �
 
 ### 1.2 시작하기
 
+#### 1.2.0 의존성 추가
+
+```xml
+<!-- Maven -->
+<dependency>
+    <groupId>io.github.hancomins</groupId>
+    <artifactId>jsn4j</artifactId>
+    <version>{version}</version>
+</dependency>
+```
+
+```gradle
+// Gradle
+implementation 'io.github.hancomins:jsn4j:{version}'
+```
+
+
 #### 1.2.1 객체 생성 및 조작
 
 ```java
