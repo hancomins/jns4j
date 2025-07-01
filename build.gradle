@@ -26,6 +26,9 @@ dependencies {
     
     // JSON5 의존성 (선택적 의존성)
     compileOnly 'io.github.hancomins:json5:1.1.1'
+
+    // Gson 의존성 (선택적 의존성)
+    compileOnly 'com.google.code.gson:gson:2.10.1'
     
     // 테스트 의존성
     testImplementation platform('org.junit:junit-bom:5.10.0')
@@ -34,6 +37,7 @@ dependencies {
     testImplementation 'com.alibaba.fastjson2:fastjson2:2.0.40'
     testImplementation 'org.json:json:20231013'
     testImplementation 'io.github.hancomins:json5:1.1.1'
+    testImplementation 'com.google.code.gson:gson:2.10.1'
 }
 
 test {

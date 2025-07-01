@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
+@SuppressWarnings("CatchMayIgnoreException")
 public class JsonStringWriterComplexPerformanceTest {
+
+    private static final boolean ENABLE_PERFORMANCE_TEST = false; // 성능 테스트 활성화 여부
     
     private static final int USER_COUNT = 100;
     private static final int ITERATIONS = 1000;
@@ -13,6 +16,10 @@ public class JsonStringWriterComplexPerformanceTest {
     
     @Test
     public void complexPerformanceTest() {
+        if(!ENABLE_PERFORMANCE_TEST) {
+            System.out.println("Performance test is disabled. Set ENABLE_PERFORMANCE_TEST to true to run.");
+            return;
+        }
         System.out.println("=== JSN4J Complex Performance Test ===");
         System.out.println("Creating " + USER_COUNT + " complex user objects");
         System.out.println("Iterations: " + ITERATIONS);

@@ -1,6 +1,6 @@
 # JSN4J - Java JSON Abstraction Library
 
-**JSN4J**는 Java 기반의 경량 JSON 구조 추상화 라이브러리입니다. SLF4J가 로깅 구현을 추상화하듯이, JSN4J는 다양한 JSON 라이브러리(Jackson, Gson, Fastjson 등)를 하나의 통합된 인터페이스로 다룰 수 있게 해줍니다.
+**JSN4J**는 Java 기반의 경량 JSON 구조 추상화 라이브러리입니다. SLF4J가 로깅 구현을 추상화하듯이, JSN4J는 다양한 JSON 라이브러리(Jackson, Gson, Fastjson2, org.json, JSON5 등)를 하나의 통합된 인터페이스로 다룰 수 있게 해줍니다.
 
 ## 목차
 
@@ -222,20 +222,6 @@ JSN4J는 플러그인 방식으로 다양한 JSON 라이브러리를 지원합�
 
 외부 의존성이 없는 기본 구현체입니다. JSN4J 코어에 포함되어 있어 추가 의존성 없이 바로 사용할 수 있습니다.
 
-```xml
-<!-- Maven - 코어만 있으면 됨 -->
-<dependency>
-    <groupId>com.hancomins</groupId>
-    <artifactId>jsn4j</artifactId>
-    <version>1.0.0</version>
-</dependency>
-```
-
-```gradle
-// Gradle
-implementation 'com.hancomins:jsn4j:1.0.0'
-```
-
 사용법:
 ```java
 // 기본적으로 Simple 구현체가 사용됨
@@ -263,15 +249,15 @@ String prettyJson = writer.write();
 ```xml
 <!-- Maven -->
 <dependency>
-    <groupId>com.hancomins</groupId>
-    <artifactId>jsn4j-jackson</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.fasterxml.jackson.core</groupId>
+    <artifactId>jackson-databind</artifactId>
+    <version>2.15.2</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.hancomins:jsn4j-jackson:1.0.0'
+implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 ```
 
 사용법:
@@ -303,15 +289,15 @@ writer.enable(JacksonWriteOption.WRITE_DATES_AS_TIMESTAMPS);
 ```xml
 <!-- Maven -->
 <dependency>
-    <groupId>com.hancomins</groupId>
-    <artifactId>jsn4j-fastjson2</artifactId>
-    <version>1.0.0</version>
+    <groupId>com.alibaba</groupId>
+    <artifactId>fastjson2</artifactId>
+    <version>2.0.40</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.hancomins:jsn4j-fastjson2:1.0.0'
+implementation 'com.alibaba:fastjson2:2.0.40'
 ```
 
 사용법:
@@ -331,20 +317,20 @@ writer.enable(Fastjson2WriteOption.WRITE_MAP_NULL_VALUE);
 
 ### 2.4 org.json
 
-Android에서 기본 제공되는 org.json 라이브러리를 지원합니다.
+ org.json 라이브러리를 지원합니다.
 
 ```xml
 <!-- Maven -->
 <dependency>
-    <groupId>com.hancomins</groupId>
-    <artifactId>jsn4j-orgjson</artifactId>
-    <version>1.0.0</version>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20231013</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.hancomins:jsn4j-orgjson:1.0.0'
+implementation 'org.json:json:20231013'
 ```
 
 사용법:
@@ -361,22 +347,56 @@ OrgJsonWriter writer = (OrgJsonWriter) obj.getWriter();
 writer.putOption(OrgJsonWriteOption.INDENT_FACTOR, 2);
 ```
 
-### 2.5 JSON5
+### 2.5 Gson
+
+Google의 인기 있는 JSON 라이브러리인 Gson을 지원합니다.
+
+```xml
+<!-- Maven -->
+<dependency>
+    <groupId>com.google.code</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.10.1</version>
+</dependency>
+```
+
+```gradle
+// Gradle
+implementation 'com.google.code.gson:2.10.1'
+```
+
+사용법:
+```java
+// Gson 팩토리 등록
+Jsn4j.registerContainerFactory(new GsonContainerFactory());
+
+// Gson 사용
+ContainerFactory gsonFactory = Jsn4j.getContainerFactoryByName("gson");
+ObjectContainer obj = gsonFactory.newObject();
+
+// Gson 특화 옵션
+GsonWriter writer = (GsonWriter) obj.getWriter();
+writer.enable(GsonWriteOption.PRETTY_PRINT);
+writer.enable(GsonWriteOption.SERIALIZE_NULLS);
+writer.enable(GsonWriteOption.ESCAPE_HTML);
+```
+
+### 2.6 JSON5
 
 JSON5 형식(주석, 따옴표 없는 키 등)을 지원합니다.
 
 ```xml
 <!-- Maven -->
 <dependency>
-    <groupId>com.hancomins</groupId>
-    <artifactId>jsn4j-json5</artifactId>
-    <version>1.0.0</version>
+    <groupId>io.github.hancomins</groupId>
+    <artifactId>json5</artifactId>
+    <version>1.1.1</version>
 </dependency>
 ```
 
 ```gradle
 // Gradle
-implementation 'com.hancomins:jsn4j-json5:1.0.0'
+implementation 'io.github.hancomins:json5:1.1.1'
 ```
 
 사용법:
@@ -406,17 +426,18 @@ writer.enable(Json5WriteOption.QUOTE_KEYS, false); // 키에 따옴표 제거
 writer.enable(Json5WriteOption.TRAILING_COMMA);    // 후행 콤마 추가
 ```
 
-### 2.6 구현체 선택 가이드
+### 2.7 구현체 선택 가이드
 
 | 구현체 | 장점 | 단점                            | 추천 사용 케이스 |
 |--------|------|-------------------------------|------------------|
 | **Simple** | • 의존성 없음<br>• 가볍고 빠름<br>• JSN4J 코어에 포함 | • 고급 기능 부족<br>• 대용량 처리 최적화 부족 | • 간단한 애플리케이션<br>• 외부 의존성 최소화가 필요한 경우 |
 | **Jackson** | • 가장 많은 기능<br>• 뛰어난 성능<br>• 광범위한 커뮤니티 지원 | • 큰 라이브러리 크기<br>• 복잡한 API     | • 엔터프라이즈 애플리케이션<br>• Spring Boot 프로젝트 |
+| **Gson** | • 간단하고 직관적인 API<br>• Google 지원<br>• 좋은 성능 | • Jackson보다 기능 적음<br>• 커스터마이징 제한적 | • Android 애플리케이션<br>• Google 생태계 프로젝트 |
 | **Fastjson2** | • 매우 빠른 성능<br>• 간단한 API | • 보안 이슈 히스토리<br>• 문서가 주로 중국어  | • 성능이 중요한 경우<br>• 대용량 데이터 처리 |
 | **org.json** | • Android 기본 포함<br>• 간단하고 직관적 | • 성능이 상대적으로 느림<br>• 기능 제한적    | • Android 애플리케이션<br>• 레거시 시스템 |
 | **JSON5** | • 사람이 읽기 쉬운 형식<br>• 주석 지원 | • 성능이 상대적으로 느림                | • 설정 파일<br>• 사람이 직접 편집하는 JSON |
 
-### 2.7 런타임 구현체 전환
+### 2.8 런타임 구현체 전환
 
 JSN4J의 강력한 기능 중 하나는 런타임에 JSON 구현체를 전환할 수 있다는 것입니다:
 
@@ -424,6 +445,7 @@ JSN4J의 강력한 기능 중 하나는 런타임에 JSON 구현체를 전환할
 // 애플리케이션 시작 시 모든 팩토리 등록
 Jsn4j.registerContainerFactory(new SimpleJsonContainerFactory());
 Jsn4j.registerContainerFactory(new JacksonContainerFactory());
+Jsn4j.registerContainerFactory(new GsonContainerFactory());
 Jsn4j.registerContainerFactory(new Fastjson2ContainerFactory());
 
 // 환경변수나 설정에 따라 구현체 선택
