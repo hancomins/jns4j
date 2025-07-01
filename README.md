@@ -456,32 +456,59 @@ writer.enable(Json5WriteOption.TRAILING_COMMA);    // 후행 콤마 추가
 
 ### 2.8 런타임 구현체 전환
 
-JSN4J의 강력한 기능 중 하나는 런타임에 JSON 구현체를 전환할 수 있다는 것입니다:
+JSN4J의 강력한 기능 중 하나는 런타임에 JSON 구현체를 전환할 수 있다는 것입니다. 
+
+#### 팩토리 이름 상수
+
+각 구현체는 다음과 같은 고정된 이름으로 등록됩니다:
+- `"simple"` - SimpleJsonContainerFactory (기본 내장)
+- `"jackson"` - JacksonContainerFactory
+- `"gson"` - GsonContainerFactory
+- `"fastjson2"` - Fastjson2ContainerFactory
+- `"orgjson"` - OrgJsonContainerFactory
+- `"json5"` - Json5ContainerFactory
 
 ```java
-// 애플리케이션 시작 시 모든 팩토리 등록
-Jsn4j.registerContainerFactory(new SimpleJsonContainerFactory());
+// 애플리케이션 시작 시 필요한 팩토리 등록 (팩토리를 사용하기 전에 반드시 등록해야 함)
+Jsn4j.registerContainerFactory(new SimpleJsonContainerFactory());  // 이미 기본으로 등록됨
 Jsn4j.registerContainerFactory(new JacksonContainerFactory());
 Jsn4j.registerContainerFactory(new GsonContainerFactory());
 Jsn4j.registerContainerFactory(new Fastjson2ContainerFactory());
+Jsn4j.registerContainerFactory(new OrgJsonContainerFactory());
+Jsn4j.registerContainerFactory(new Json5ContainerFactory());
 
 // 환경변수나 설정에 따라 구현체 선택
-String jsonImpl = System.getProperty("json.implementation", "simple");
-ContainerFactory factory = Jsn4j.getContainerFactoryByName(jsonImpl);
+ContainerFactory factory = Jsn4j.getContainerFactoryByName("simple");
 if (factory != null) {
     Jsn4j.setDefaultContainerFactory(factory);
 }
 
 // 특정 작업에만 다른 구현체 사용
 ContainerFactory jacksonFactory = Jsn4j.getContainerFactoryByName("jackson");
-ObjectContainer complexData = jacksonFactory.newObject();
-// Jackson의 고급 기능을 활용한 복잡한 데이터 처리...
+if (jacksonFactory != null) {
+    ObjectContainer complexData = jacksonFactory.newObject();
+    // Jackson의 고급 기능을 활용한 복잡한 데이터 처리...
+}
 
 // 성능이 중요한 부분에서는 Fastjson2 사용
 ContainerFactory fastjsonFactory = Jsn4j.getContainerFactoryByName("fastjson2");
-ArrayContainer bigArray = fastjsonFactory.newArray();
-// 대용량 배열 처리...
+if (fastjsonFactory != null) {
+    ArrayContainer bigArray = fastjsonFactory.newArray();
+    // 대용량 배열 처리...
+}
+
+// 사람이 읽기 쉬운 형식이 필요한 경우 JSON5 사용
+ContainerFactory json5Factory = Jsn4j.getContainerFactoryByName("json5");
+if (json5Factory != null) {
+    ObjectContainer config = json5Factory.newObject();
+    // 주석과 유연한 구문을 지원하는 설정 파일 처리...
+}
 ```
+
+**주의사항:**
+- 팩토리 이름은 대소문자를 구분합니다
+- 등록되지 않은 팩토리를 요청하면 `null`을 반환합니다
+- 각 팩토리는 싱글톤 패턴으로 구현되어 있어 `getInstance()` 메서드를 통해서도 접근 가능합니다
 
 ## 3. ContainerValues 클래스와 메서드 소개
 
