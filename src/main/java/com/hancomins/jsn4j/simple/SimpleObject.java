@@ -20,7 +20,13 @@ public class SimpleObject extends AbstractSimpleContainer implements ObjectConta
         if(!containerValue.isObject()) {
             throw new IllegalArgumentException("Invalid JSON object: " + jsonObject);
         }
-        this.objectMap = ((SimpleObject)containerValue.asObject()).objectMap;
+        // Deep copy to avoid sharing the same HashMap
+        SimpleObject source = (SimpleObject)containerValue.asObject();
+        this.objectMap = new HashMap<>();
+        for (Map.Entry<String, ContainerValue> entry : source.objectMap.entrySet()) {
+            //noinspection UseBulkOperation
+            this.objectMap.put(entry.getKey(), entry.getValue());
+        }
     }
 
 

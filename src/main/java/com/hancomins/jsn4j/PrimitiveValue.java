@@ -134,8 +134,10 @@ public class PrimitiveValue implements ContainerValue {
             System.arraycopy(b, 0, newB, 4 - b.length, b.length);
             b = newB;
         }
-        for (int i = 0; i < 4; i++) {
-            result |= ((b[i] & 0xFF)) << (8 * (b.length - i - 1));
+        // 배열 길이가 4보다 크면 처음 4바이트만 사용
+        @SuppressWarnings("DataFlowIssue") int len = Math.min(b.length, 4);
+        for (int i = 0; i < len; i++) {
+            result |= ((b[i] & 0xFF)) << (8 * (3 - i));
         }
         return result;
     }
@@ -149,8 +151,10 @@ public class PrimitiveValue implements ContainerValue {
             System.arraycopy(b, 0, newB, 8 - b.length, b.length);
             b = newB;
         }
-        for (int i = 0; i < 8; i++) {
-            result |= ((long) (b[i] & 0xFF)) << (8 * (b.length - i - 1));
+        // 배열 길이가 8보다 크면 처음 8바이트만 사용
+        @SuppressWarnings("DataFlowIssue") int len = Math.min(b.length, 8);
+        for (int i = 0; i < len; i++) {
+            result |= ((long) (b[i] & 0xFF)) << (8 * (7 - i));
         }
         return result;
     }

@@ -8,6 +8,8 @@ public class JsonTokenizer {
     private final Reader reader;
     private int current = -2; // -2 = not read, -1 = EOF
     private int position = 0;
+    private int line = 1;
+    private int column = 0;
 
     public JsonTokenizer(Reader reader) {
         this.reader = reader;
@@ -26,7 +28,7 @@ public class JsonTokenizer {
             current = read();
         }
         if (current == -1) {
-            throw new IllegalStateException("Unexpected EOF");
+            throw new IllegalStateException("Unexpected EOF " + positionInfo());
         }
         return (char) current;
     }
@@ -43,7 +45,7 @@ public class JsonTokenizer {
     public void expect(char expected) {
         char c = next();
         if (c != expected) {
-            throw new IllegalStateException("Expected '" + expected + "', got '" + c + "'");
+            throw new IllegalStateException("Expected '" + expected + "', got '" + c + "' " + positionInfo());
         }
     }
 
@@ -58,9 +60,15 @@ public class JsonTokenizer {
         expect('\"');
         StringBuilder sb = new StringBuilder();
         while (true) {
+            if (isEOF()) {
+                throw new IllegalStateException("Unexpected EOF while reading string " + positionInfo());
+            }
             char c = next();
             if (c == '\"') break;
             if (c == '\\') {
+                if (isEOF()) {
+                    throw new IllegalStateException("Unexpected EOF while reading escape sequence " + positionInfo());
+                }
                 char esc = next();
                 switch (esc) {
                     case 'b': sb.append('\b'); break;
@@ -70,7 +78,24 @@ public class JsonTokenizer {
                     case 't': sb.append('\t'); break;
                     case '\"': sb.append('\"'); break;
                     case '\\': sb.append('\\'); break;
-                    default: throw new IllegalStateException("Invalid escape: \\\\" + esc);
+                    case '/': sb.append('/'); break;
+                    case 'u': 
+                        // Unicode escape sequence
+                        StringBuilder unicode = new StringBuilder();
+                        for (int i = 0; i < 4; i++) {
+                            if (isEOF()) {
+                                throw new IllegalStateException("Unexpected EOF in unicode escape sequence " + positionInfo());
+                            }
+                            char hex = next();
+                            if (!isHexDigit(hex)) {
+                                throw new IllegalStateException("Invalid unicode escape sequence: \\\\u" + unicode + hex + " " + positionInfo());
+                            }
+                            unicode.append(hex);
+                        }
+                        int codePoint = Integer.parseInt(unicode.toString(), 16);
+                        sb.append((char) codePoint);
+                        break;
+                    default: throw new IllegalStateException("Invalid escape: \\\\" + esc + " " + positionInfo());
                 }
             } else {
                 sb.append(c);
@@ -81,18 +106,50 @@ public class JsonTokenizer {
 
     public Number readNumber() {
         StringBuilder sb = new StringBuilder();
+        boolean isDouble = false;
+        
+        // Sign
         if (peek() == '-') sb.append(next());
-        while (!isEOF() && Character.isDigit(peek())) {
-            sb.append(next());
-        }
-        if (!isEOF() && peek() == '.') {
-            sb.append(next());
+        
+        // Integer part
+        if (!isEOF() && Character.isDigit(peek())) {
             while (!isEOF() && Character.isDigit(peek())) {
                 sb.append(next());
             }
-            return Double.parseDouble(sb.toString());
+        } else {
+            throw new IllegalStateException("Expected digit " + positionInfo());
         }
-        return Long.parseLong(sb.toString());
+        
+        // Decimal part
+        if (!isEOF() && peek() == '.') {
+            isDouble = true;
+            sb.append(next());
+            if (!isEOF() && Character.isDigit(peek())) {
+                while (!isEOF() && Character.isDigit(peek())) {
+                    sb.append(next());
+                }
+            } else {
+                throw new IllegalStateException("Expected digit after decimal point " + positionInfo());
+            }
+        }
+        
+        // Exponent part
+        if (!isEOF() && (peek() == 'e' || peek() == 'E')) {
+            isDouble = true;
+            sb.append(next());
+            if (!isEOF() && (peek() == '+' || peek() == '-')) {
+                sb.append(next());
+            }
+            if (!isEOF() && Character.isDigit(peek())) {
+                while (!isEOF() && Character.isDigit(peek())) {
+                    sb.append(next());
+                }
+            } else {
+                throw new IllegalStateException("Expected digit in exponent " + positionInfo());
+            }
+        }
+        
+        return isDouble ? Double.parseDouble(sb.toString()) : Long.parseLong(sb.toString());
     }
 
     public boolean matchLiteral(String literal) {
@@ -107,16 +164,26 @@ public class JsonTokenizer {
     }
 
     public String positionInfo() {
-        return "at position " + position;
+        return "at line " + line + ", column " + column + " (position " + position + ")";
     }
 
     private int read() {
         try {
             int c = reader.read();
             position++;
+            if (c == '\n') {
+                line++;
+                column = 0;
+            } else if (c != -1) {
+                column++;
+            }
             return c;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("IO error at " + positionInfo(), e);
         }
+    }
+    
+    private boolean isHexDigit(char c) {
+        return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
     }
 }

@@ -22,7 +22,7 @@ public class SimpleJsonParser implements ContainerParser {
         ContainerValue value = parseValue(tokenizer);
         tokenizer.skipWhitespace();
         if (!tokenizer.isEOF()) {
-            throw new IllegalStateException("Extra content after end of JSON");
+            throw new IllegalStateException("Extra content after end of JSON " + tokenizer.positionInfo());
         }
         return value;
     }
@@ -42,7 +42,7 @@ public class SimpleJsonParser implements ContainerParser {
         if (tokenizer.matchLiteral("true")) return new PrimitiveValue(true);
         if (tokenizer.matchLiteral("false")) return new PrimitiveValue(false);
         if (tokenizer.matchLiteral("null")) return new PrimitiveValue(null);
-        throw new IllegalArgumentException("Unexpected token at: " + tokenizer.positionInfo());
+        throw new IllegalArgumentException("Unexpected token " + tokenizer.positionInfo());
     }
 
     private ObjectContainer parseObject(JsonTokenizer tokenizer) {
@@ -64,12 +64,11 @@ public class SimpleJsonParser implements ContainerParser {
             char next = tokenizer.peek();
             if (next == ',') {
                 tokenizer.expect(',');
-                continue;
             } else if (next == '}') {
                 tokenizer.expect('}');
                 break;
             } else {
-                throw new IllegalStateException("Expected ',' or '}' in object");
+                throw new IllegalStateException("Expected ',' or '}' in object " + tokenizer.positionInfo());
             }
         }
         return obj;
@@ -90,12 +89,11 @@ public class SimpleJsonParser implements ContainerParser {
             char next = tokenizer.peek();
             if (next == ',') {
                 tokenizer.expect(',');
-                continue;
             } else if (next == ']') {
                 tokenizer.expect(']');
                 break;
             } else {
-                throw new IllegalStateException("Expected ',' or ']' in array");
+                throw new IllegalStateException("Expected ',' or ']' in array " + tokenizer.positionInfo());
             }
         }
         return arr;
