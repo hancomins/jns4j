@@ -101,7 +101,8 @@ class ContainerValuesTest {
 
         ObjectContainer b = factory.newObject()
                 .put("x", new PrimitiveValue(1))
-                .put("y", new PrimitiveValue(false));
+                .put("y", new PrimitiveValue(false))
+                .put("z", "test");
 
         ContainerValue intersect = ContainerValues.intersection(a, b);
 
@@ -119,7 +120,8 @@ class ContainerValuesTest {
 
         ObjectContainer b = factory.newObject()
                 .put("name", new PrimitiveValue("BlinkBin"))
-                .put("version", new PrimitiveValue(2));
+                .put("version", new PrimitiveValue(2))
+                .put("count", 125);
 
         ContainerValue diff = ContainerValues.diff(a, b);
 

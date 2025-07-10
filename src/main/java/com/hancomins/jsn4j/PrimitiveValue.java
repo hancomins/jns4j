@@ -45,6 +45,7 @@ public class PrimitiveValue implements ContainerValue {
 
 
 
+
     public short asShort() {
         if(raw instanceof Short) {
             return (short) raw;

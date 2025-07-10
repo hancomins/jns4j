@@ -1,6 +1,7 @@
 package com.hancomins.jsn4j;
 
 
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -47,8 +48,8 @@ public class ContainerValues {
     /**
      * 하나의 ContainerValue의 내용을 다른 ContainerValue에 복사합니다.
      *
-     * @param target 복사할 대상 ContainerValue
-     * @param source 복사할 원본 ContainerValue
+     * @param target 복사 대상 ContainerValue
+     * @param source 복사 원본 ContainerValue
      * @throws IllegalArgumentException 대상과 원본의 값 유형이 일치하지 않는 경우
      * @throws UnsupportedOperationException 값 유형에 대해 복사 작업이 지원되지 않는 경우
      */
@@ -83,6 +84,82 @@ public class ContainerValues {
         }
     }
 
+    public static ContainerValue cloneContainer(ContainerValue source) {
+        if (source == null || source.isNull()) return new PrimitiveValue(null);
+        switch (source.getValueType()) {
+            case PRIMITIVE:
+                return new PrimitiveValue(source.raw());
+            case OBJECT:
+                ObjectContainer objectContainer = source.asObject().getContainerFactory().newObject();
+                ContainerValues.copy(objectContainer, source.asObject());
+                return objectContainer;
+            case ARRAY:
+                ArrayContainer arrayContainer = source.asArray().getContainerFactory().newArray();
+                ContainerValues.copy(arrayContainer, source.asArray());
+                return arrayContainer;
+            default:
+                throw new UnsupportedOperationException("Clone not supported for type: " + source.getValueType());
+        }
+
+    }
+
+    public static ContainerValue concat(ContainerValue target, ContainerValue source) {
+        if ((target == null || target.isNull()) && (source == null || source.isNull())) {
+            throw new NullPointerException("Both target and source cannot be null or null value");
+        }
+        if(target == source) {
+            source = ContainerValues.cloneContainer(source);
+            if(source.getValueType() == ValueType.OBJECT) {
+                return source;
+            }
+        }
+
+
+
+        ValueType targetType = (target != null) ? target.getValueType() : null;
+        ValueType sourceType = (source != null) ? source.getValueType() : null;
+        if(targetType != null && sourceType == null) {
+            return ContainerValues.cloneContainer(target);
+        }
+        else if(sourceType != null && targetType == null) {
+            return ContainerValues.cloneContainer(source);
+        }
+        ValueType mergeableType = getValueTypeOfMergeable(targetType, sourceType);
+        switch (mergeableType) {
+            case ARRAY:
+                ArrayContainer targetArray = target.asArray();
+                ArrayContainer sourceArray = source.asArray();
+                ArrayContainer resultArray = targetArray.getContainerFactory().newArray(target);
+                resultArray.putAll(targetArray);
+                resultArray.putAll(sourceArray);
+                return resultArray;
+            case OBJECT:
+                ObjectContainer targetObject = target.asObject();
+                ObjectContainer sourceObject = source.asObject();
+                ObjectContainer resultObject = targetObject.getContainerFactory().newObject();
+                ContainerValues.merge(resultObject, sourceObject);
+                ContainerValues.merge(resultObject, targetObject);
+                return resultObject;
+            default:
+                throw new IllegalArgumentException("Unexpected value type: " + targetType);
+        }
+    }
+
+    private static ValueType getValueTypeOfMergeable(ValueType targetType, ValueType sourceType) {
+
+        if(targetType != null && (targetType != ValueType.OBJECT && targetType != ValueType.ARRAY)) {
+            throw new IllegalArgumentException("Target must be an Object or Array type, but was: " + targetType);
+        }
+        if(sourceType != null && (sourceType != ValueType.OBJECT && sourceType != ValueType.ARRAY)) {
+            throw new IllegalArgumentException("Source must be an Object or Array type, but was: " + sourceType);
+        }
+        if(targetType != sourceType) {
+            throw new IllegalArgumentException("Target and source must be of the same type, but were: "
+                    + targetType + " and " + sourceType);
+        }
+        return sourceType;
+    }
+
     /**
      * 하나의 ContainerValue의 내용을 다른 ContainerValue에 병합합니다.
      *
@@ -98,26 +175,77 @@ public class ContainerValues {
                     + target.getValueType() + " vs " + source.getValueType());
         }
 
+        if(target == source) {
+            source = ContainerValues.cloneContainer(source);
+        }
+
         switch (target.getValueType()) {
             case OBJECT:
                 ObjectContainer tgtObj = target.asObject();
                 ObjectContainer srcObj = source.asObject();
-                for (String key : srcObj.keySet()) {
-                    ContainerValue val = srcObj.get(key);
-                    addValue(tgtObj, key, val);
-                }
+                mergeObjectContainer(tgtObj, srcObj);
                 break;
             case ARRAY:
                 ArrayContainer tgtArr = target.asArray();
                 ArrayContainer srcArr = source.asArray();
-                for (int i = 0; i < srcArr.size(); i++) {
-                    ContainerValue val = srcArr.get(i);
-                    addValue(tgtArr, val);
-                }
+                mergeArrayContainer(tgtArr, srcArr);
                 break;
             default:
                 throw new UnsupportedOperationException("Merge not supported for type: " + target.getValueType());
         }
+    }
+
+    private static void mergeArrayContainer(ArrayContainer target, ArrayContainer source) {
+        int targetSize = target.size();
+        int sourceSize = source.size();
+        int size =  Math.min(targetSize, sourceSize);
+        for (int i = 0; i < size; i++) {
+            ContainerValue val = source.get(i);
+            if(val instanceof ObjectContainer) {
+                ContainerValue targetVal = target.get(i);
+                if(targetVal instanceof ObjectContainer) {
+                    mergeObjectContainer((ObjectContainer)targetVal, (ObjectContainer)val);
+                } else {
+                    target.put(i, val);
+                }
+            } else if(val instanceof ArrayContainer) {
+                ContainerValue targetVal = target.get(i);
+                if(targetVal instanceof ArrayContainer) {
+                    mergeArrayContainer((ArrayContainer)targetVal, (ArrayContainer)val);
+                } else {
+                    target.put(i, val);
+                }
+            } else {
+                target.put(i, val);
+            }
+        }
+        if(targetSize < sourceSize) {
+            for (int i = targetSize; i < sourceSize; i++) {
+                ContainerValue val = source.get(i);
+                if(val instanceof ObjectContainer) {
+                    target.putCopy((ObjectContainer)val);
+                } else if(val instanceof ArrayContainer) {
+                    target.putCopy((ArrayContainer)val);
+                } else {
+                    addValue(target, val);
+                }
+            }
+        }
+    }
+
+    private static void mergeObjectContainer(ObjectContainer target, ObjectContainer source) {
+        for (String key : source.keySet()) {
+            ContainerValue val = source.get(key);
+            if(val instanceof ObjectContainer) {
+                ContainerValue targetVal = target.get(key);
+                if(targetVal instanceof ObjectContainer) {
+                    mergeObjectContainer((ObjectContainer)targetVal, (ObjectContainer)val);
+                    continue;
+                }
+            }
+            addValue(target, key, val);
+        }
+
     }
 
     /**
@@ -139,9 +267,30 @@ public class ContainerValues {
                 ObjectContainer objB = b.asObject();
                 ObjectContainer result = objA.getContainerFactory().newObject();
                 for (String key : objA.keySet()) {
-                    if (objB.containsKey(key) && equals(objA.get(key), objB.get(key))) {
-                        ContainerValue val = objA.get(key);
-                        addValue(result, key, val);
+                    if (objB.containsKey(key)) {
+                        ContainerValue valA = objA.get(key);
+                        ContainerValue valB = objB.get(key);
+                        
+                        if (valA != null && valB != null) {
+                            if (valA.getValueType() == valB.getValueType()) {
+                                if (valA.isObject()) {
+                                    // Deep intersection for nested objects
+                                    ContainerValue intersected = intersection(valA, valB);
+                                    if (intersected != null && intersected.isObject() && !intersected.asObject().isEmpty()) {
+                                        result.put(key, intersected);
+                                    }
+                                } else if (valA.isArray()) {
+                                    // Deep intersection for nested arrays
+                                    ContainerValue intersected = intersection(valA, valB);
+                                    if (intersected != null && intersected.isArray()) {
+                                        result.put(key, intersected);
+                                    }
+                                } else if (equals(valA, valB)) {
+                                    // For primitives and equal values
+                                    addValue(result, key, valA);
+                                }
+                            }
+                        }
                     }
                 }
                 return result;
@@ -151,9 +300,28 @@ public class ContainerValues {
                 ArrayContainer resultArr = arrA.getContainerFactory().newArray();
                 int size = Math.min(arrA.size(), arrB.size());
                 for (int i = 0; i < size; i++) {
-                    if (equals(arrA.get(i), arrB.get(i))) {
-                        ContainerValue val = arrA.get(i);
-                        addValue(resultArr, val);
+                    ContainerValue valA = arrA.get(i);
+                    ContainerValue valB = arrB.get(i);
+                    
+                    if (valA != null && valB != null) {
+                        if (valA.getValueType() == valB.getValueType()) {
+                            if (valA.isObject()) {
+                                // Deep intersection for nested objects
+                                ContainerValue intersected = intersection(valA, valB);
+                                if (intersected != null && intersected.isObject() && !intersected.asObject().isEmpty()) {
+                                    resultArr.put(intersected);
+                                }
+                            } else if (valA.isArray()) {
+                                // Deep intersection for nested arrays
+                                ContainerValue intersected = intersection(valA, valB);
+                                if (intersected != null && intersected.isArray() && !intersected.asArray().isEmpty()) {
+                                    resultArr.put(intersected);
+                                }
+                            } else if (equals(valA, valB)) {
+                                // For primitives, only include if equal
+                                addValue(resultArr, valA);
+                            }
+                        }
                     }
                 }
                 return resultArr;
@@ -182,9 +350,32 @@ public class ContainerValues {
                 ObjectContainer objB = b.asObject();
                 ObjectContainer result = objA.getContainerFactory().newObject();
                 for (String key : objA.keySet()) {
-                    if (!objB.containsKey(key) || !equals(objA.get(key), objB.get(key))) {
+                    if (!objB.containsKey(key)) {
+                        // Key exists only in a
                         ContainerValue val = objA.get(key);
                         addValue(result, key, val);
+                    } else {
+                        ContainerValue valA = objA.get(key);
+                        ContainerValue valB = objB.get(key);
+                        
+                        // Deep diff for nested objects and arrays
+                        if (valA != null && valB != null) {
+                            if (valA.isObject() && valB.isObject()) {
+                                ContainerValue diffed = diff(valA, valB);
+                                if (diffed != null && diffed.isObject() && !diffed.asObject().isEmpty()) {
+                                    result.put(key, diffed);
+                                }
+                            } else if (valA.isArray() && valB.isArray()) {
+                                ContainerValue diffed = diff(valA, valB);
+                                if (diffed != null && diffed.isArray() && !diffed.asArray().isEmpty()) {
+                                    result.put(key, diffed);
+                                }
+                            } else if (!equals(valA, valB)) {
+                                addValue(result, key, valA);
+                            }
+                        } else if (!equals(valA, valB)) {
+                            addValue(result, key, valA);
+                        }
                     }
                 }
                 return result;
@@ -194,12 +385,38 @@ public class ContainerValues {
                 ArrayContainer resultArr = arrA.getContainerFactory().newArray();
                 int size = Math.min(arrA.size(), arrB.size());
                 for (int i = 0; i < size; i++) {
-                    if (!equals(arrA.get(i), arrB.get(i))) {
-                        ContainerValue val = arrA.get(i);
-                       addValue(resultArr, val);
+                    ContainerValue valA = arrA.get(i);
+                    ContainerValue valB = arrB.get(i);
+                    
+                    if (valA != null && valB != null) {
+                        if (valA.getValueType() == valB.getValueType()) {
+                            if (valA.isObject()) {
+                                // Deep diff for nested objects
+                                ContainerValue diffed = diff(valA, valB);
+                                if (diffed != null && diffed.isObject() && !diffed.asObject().isEmpty()) {
+                                    resultArr.put(diffed);
+                                }
+                            } else if (valA.isArray()) {
+                                // Deep diff for nested arrays
+                                ContainerValue diffed = diff(valA, valB);
+                                if (diffed != null && diffed.isArray() && !diffed.asArray().isEmpty()) {
+                                    resultArr.put(diffed);
+                                }
+                            } else if (!equals(valA, valB)) {
+                                // For primitives, only include if different
+                                addValue(resultArr, valA);
+                            }
+                        } else {
+                            // Different types
+                            addValue(resultArr, valA);
+                        }
+                    } else if (valA != null && valB == null) {
+                        // valB is null
+                        addValue(resultArr, valA);
                     }
                 }
-                for (int i = arrB.size(); i < arrA.size(); i++) {
+                // Include elements that exist only in a
+                for (int i = arrB.size(), arrASize = arrA.size(); i < arrASize; i++) {
                     ContainerValue val = arrA.get(i);
                     addValue(resultArr, val);
                 }
@@ -227,6 +444,10 @@ public class ContainerValues {
             resultArr.putCopy(val.asArray());
         }
     }
+
+
+
+
 
     /**
      * ObjectContainer에 값을 추가합니다.

@@ -3,12 +3,23 @@ package com.hancomins.jsn4j;
 
 
 
+import com.google.gson.Gson;
+import com.hancomins.jsn4j.fastjson2.Fastjson2ContainerFactory;
+import com.hancomins.jsn4j.gson.GsonContainerFactory;
+import com.hancomins.jsn4j.jackson.JacksonContainerFactory;
+import com.hancomins.jsn4j.jackson.JacksonObject;
+import com.hancomins.jsn4j.json5.Json5ContainerFactory;
+import com.hancomins.jsn4j.orgjson.OrgJsonContainerFactory;
+import com.hancomins.jsn4j.simple.SimpleJsonContainerFactory;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.EnumMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @SuppressWarnings("UnusedReturnValue")
 public class Jsn4j {
@@ -16,6 +27,8 @@ public class Jsn4j {
     private static final String DEFAULT_CONTAINER_FACTORY = "com.hancomins.jsn4j.simple.SimpleJsonContainerFactory";
     public static final String DEFAULT_CONTAINER_FACTORY_PROPERTY_NAME = "jsn4j.container.factory";
     private static final ConcurrentHashMap<String, ContainerFactory> nameContainerFactories = new ConcurrentHashMap<>();
+    private static final EnumMap<JsonLibrary, ContainerFactory> libraryContainerFactories = new EnumMap<>(JsonLibrary.class);
+
     private static final ConcurrentHashMap<Class<? extends ContainerFactory>, ContainerFactory> classContainerFactories = new ConcurrentHashMap<>();
     private static ContainerFactory defaultContainerFactory;
 
@@ -34,6 +47,46 @@ public class Jsn4j {
                  NoSuchMethodException e) {
             e.printStackTrace(System.err);
         }
+
+
+
+    }
+
+    private static void initFactoryEnums() {
+        if (defaultContainerFactory == null) {
+            throw new IllegalStateException("Default ContainerFactory is not set");
+        }
+        ConcurrentHashMap<JsonLibrary, ContainerFactory> libraryFactories = new ConcurrentHashMap<>();
+        JsonLibrary[] jsonLibraries = JsonLibrary.values();
+        java.util.Arrays.stream(jsonLibraries).forEach(library -> {
+            try {
+                switch (library) {
+                    case GSON:
+                        libraryFactories.put(library, GsonContainerFactory.getInstance());
+                        break;
+                    case JACKSON:
+                        libraryFactories.put(library, JacksonContainerFactory.getInstance());
+                        break;
+                    case JSON5:
+                        libraryFactories.put(library, Json5ContainerFactory.getInstance());
+                        break;
+                    case ORG_JSON:
+                        libraryFactories.put(library, OrgJsonContainerFactory.getInstance());
+                        break;
+                    case SIMPLE:
+                        libraryFactories.put(library, SimpleJsonContainerFactory.getInstance());
+                        break;
+                    case FASTJSON2:
+                        libraryFactories.put(library, Fastjson2ContainerFactory.getInstance());
+                        break;
+                }
+            } catch (Exception e) {
+                System.err.println("Failed to initialize factory for " + library + ": " + e.getMessage());
+                e.printStackTrace();
+            }
+        });
+        libraryContainerFactories.putAll(libraryFactories);
+
     }
 
     public static ContainerValue parse(String json) {
@@ -152,6 +205,8 @@ public class Jsn4j {
         }
     }
 
+
+
     public static void registerContainerFactory(Class<? extends ContainerFactory> containerFactoryClass) throws ClassNotFoundException, InvocationTargetException, InstantiationException, IllegalAccessException, NoSuchMethodException {
         ContainerFactory factory = classContainerFactories.get(containerFactoryClass);
         if (factory == null) {
@@ -191,8 +246,33 @@ public class Jsn4j {
         registerContainerFactory(factory);
     }
 
+    public static void setDefaultContainerFactory(JsonLibrary jsonLibrary) {
+        if (jsonLibrary == null) {
+            throw new NullPointerException("JsonLibrary cannot be null");
+        }
+        ContainerFactory factory = libraryContainerFactories.get(jsonLibrary);
+        if (factory == null) {
+            throw new IllegalArgumentException("ContainerFactory not found for JsonLibrary: " + jsonLibrary);
+        }
+        setDefaultContainerFactory(factory);
+    }
+
     public static ContainerFactory getDefaultContainerFactory() {
         return defaultContainerFactory;
+    }
+
+    public static ContainerFactory getContainerFactory(JsonLibrary jsonLibrary) {
+        if (jsonLibrary == null) {
+            throw new IllegalArgumentException("JsonLibrary cannot be null");
+        }
+        if (libraryContainerFactories.isEmpty()) {
+            initFactoryEnums();
+        }
+        ContainerFactory factory = libraryContainerFactories.get(jsonLibrary);
+        if (factory == null) {
+            throw new IllegalArgumentException("ContainerFactory not found for JsonLibrary: " + jsonLibrary);
+        }
+        return factory;
     }
 
     public static ContainerFactory getContainerFactoryByName(String name) {

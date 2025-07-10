@@ -396,5 +396,26 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
         return child;
     }
 
+    default void merge(ObjectContainer source) {
+        ContainerValues.merge(this, source);
+    }
+
+    default ObjectContainer concat(ObjectContainer source) {
+        return ContainerValues.concat(this, source).asObject();
+    }
+
+    default ObjectContainer convertTo(JsonLibrary jsonLibrary) {
+        ContainerFactory containerFactory = Jsn4j.getContainerFactory(jsonLibrary);
+        if(containerFactory == getContainerFactory()) {
+            return this;
+        } else {
+            ObjectContainer newContainer = containerFactory.newObject();
+            ContainerValues.copy(newContainer, this);
+            return newContainer;
+        }
+    }
+
+
+
 
 }

@@ -22,14 +22,22 @@ repositories {
     mavenCentral()
 }
 def JAVA_VERSION = 1.8
+
+
+
 def signPropsFilePath =  getAbsolutePath("${projectDir}/sign.properties");
+
 Properties signProperties = new Properties()
-if (file(signPropsFilePath).exists()) {
-    try(InputStream inputStream = new FileInputStream(signPropsFilePath)) {
-        signProperties.load(inputStream)
+try {
+    if (file(signPropsFilePath).exists()) {
+        try (InputStream inputStream = new FileInputStream(signPropsFilePath)) {
+            signProperties.load(inputStream)
+        }
+        String keyRingFilePath = getAbsolutePath(signProperties.getProperty(JarSign.PROPERTY_KEY_SECRET_KEY_RING_FILE, ''))
+        signProperties.setProperty(JarSign.PROPERTY_KEY_SECRET_KEY_RING_FILE, keyRingFilePath);
     }
-    String keyRingFilePath = getAbsolutePath(signProperties.getProperty(JarSign.PROPERTY_KEY_SECRET_KEY_RING_FILE, ''))
-    signProperties.setProperty(JarSign.PROPERTY_KEY_SECRET_KEY_RING_FILE, keyRingFilePath);
+}catch (Exception e) {
+    println "Error loading sign properties from ${signPropsFilePath}: ${e.message}"
 }
 
 // java8 기반

@@ -50,6 +50,19 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
         return this;
     }
 
+    default ArrayContainer putAll(ArrayContainer arrayContainer) {
+        if (arrayContainer == null) {
+            return this;
+        }
+        int size = arrayContainer.size();
+        for (int i = 0; i < size; i++) {
+            ContainerValue value = arrayContainer.get(i);
+            put(value);
+
+        }
+        return this;
+    }
+
 
     default ArrayContainer put(char value) {
         return put(getContainerFactory().newPrimitive(value));
@@ -423,6 +436,26 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
 
     void clear();
+
+
+    default void merge(ArrayContainer source) {
+        ContainerValues.merge(this, source);
+    }
+
+    default ArrayContainer concat(ArrayContainer source) {
+        return ContainerValues.concat(this, source).asArray();
+    }
+
+    default ArrayContainer convertTo(JsonLibrary jsonLibrary) {
+        ContainerFactory containerFactory = Jsn4j.getContainerFactory(jsonLibrary);
+        if(containerFactory == getContainerFactory()) {
+            return this;
+        } else {
+            ArrayContainer newContainer = containerFactory.newArray();
+            ContainerValues.copy(newContainer, this);
+            return newContainer;
+        }
+    }
 
 
 
