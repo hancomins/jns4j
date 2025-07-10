@@ -279,8 +279,6 @@ implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
 
 사용법:
 ```java
-// Jackson 팩토리 등록 (한 번만 수행)
-Jsn4j.registerContainerFactory(JacksonContainerFactory.getInstance());
 
 // Jackson을 기본으로 설정
 ContainerFactory jacksonFactory = Jsn4j.getContainerFactory(JsonLibrary.JACKSON);
@@ -320,8 +318,7 @@ implementation 'com.alibaba:fastjson2:2.0.40'
 사용법:
 ```java
 
-// Fastjson2 팩토리 등록
-Jsn4j.registerContainerFactory(Fastjson2ContainerFactory.getInstance());
+
 
 // Fastjson2 사용
 ContainerFactory fastjsonFactory = Jsn4j.getContainerFactory(JsonLibrary.FASTJSON2);
@@ -354,8 +351,6 @@ implementation 'org.json:json:20231013'
 사용법:
 ```java
 
-// org.json 팩토리 등록
-Jsn4j.registerContainerFactory(OrgJsonContainerFactory.getInstance());
 
 // org.json 사용
 ContainerFactory orgJsonFactory = Jsn4j.getContainerFactory(JsonLibrary.ORG_JSON);
@@ -387,8 +382,7 @@ implementation 'com.google.code.gson:2.10.1'
 사용법:
 ```java
 
-// Gson 팩토리 등록
-Jsn4j.registerContainerFactory(GsonContainerFactory.getInstance());
+
 
 // Gson 사용
 ContainerFactory gsonFactory = Jsn4j.getContainerFactory(JsonLibrary.GSON);
@@ -421,8 +415,7 @@ implementation 'io.github.hancomins:json5:1.1.1'
 
 사용법:
 ```java
-// JSON5 팩토리 등록
-Jsn4j.registerContainerFactory(Json5ContainerFactory.getInstance());
+
 
 // JSON5 파싱 (주석, 따옴표 없는 키 지원)
 String json5 = """
