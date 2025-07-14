@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(chmod:*)",
+      "Bash(./gradlew test:*)",
+      "Bash(dos2unix:*)",
+      "Bash(sed:*)",
+      "Bash(./gradlew:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(gradle test:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)",
+      "Bash(cat:*)",
+      "Bash(./gradlew:*)",
+      "Bash(rg:*)",
+      "Bash(cd /mnt/c/Work/git/CLIPreport6HQ/vegetableMix)",
+      "Bash(cmd.exe:*)",
+      "Bash(find:*)",
+      "Bash(echo:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:*)",
+      "Bash(../gradlew:*)",
+      "Bash(jar tf:*)",
+      "Bash(javap:*)",
+      "Bash(touch:*)",
+      "Bash(java:*)",
+      "Bash(rm:*)"
+    ],
+    "deny": []
+  }
+}

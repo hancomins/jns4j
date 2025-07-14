@@ -84,18 +84,25 @@ public abstract class AbstractJsonStringWriter<T extends AbstractJsonStringWrite
         return result;
     }
     
+
+    abstract String build(boolean checkClosed);
+
+
     /**
      * JSON을 완성하고 문자열을 반환합니다.
      * @return 완성된 JSON 문자열
      */
-    public abstract String build();
+    public String build() {
+        return build(true);
+    }
+
     
     /**
      * toString()은 build()를 호출합니다.
      */
     @Override
     public String toString() {
-        return build();
+        return build(false);
     }
     
     /**

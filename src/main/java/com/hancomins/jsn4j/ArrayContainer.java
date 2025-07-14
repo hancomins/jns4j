@@ -4,8 +4,8 @@ package com.hancomins.jsn4j;
 import java.util.Collection;
 import java.util.List;
 
-@SuppressWarnings({"UnusedReturnValue", "unused"})
-public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>, ContainerFactoryProvidable {
+@SuppressWarnings({"UnusedReturnValue", "unused", "unchecked"})
+public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>, ContainerFactoryProvidable, ValueWriter {
 
 
 
@@ -38,6 +38,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
         return put(index, getContainerFactory().newPrimitive(value));
     }
 
+    @SuppressWarnings("unchecked")
     ArrayContainer put(Object value);
 
     default ArrayContainer putAll(Collection<?> value) {
@@ -91,6 +92,12 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
     default ArrayContainer put(boolean value) {
         return put(getContainerFactory().newPrimitive(value));
+    }
+
+
+
+    default ArrayContainer putNull() {
+        return put(getContainerFactory().newPrimitive(null));
     }
 
     default ObjectContainer putCopy(ObjectContainer source) {

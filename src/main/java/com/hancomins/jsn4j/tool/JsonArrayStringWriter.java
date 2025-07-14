@@ -3,6 +3,7 @@ package com.hancomins.jsn4j.tool;
 import com.hancomins.jsn4j.ArrayContainer;
 import com.hancomins.jsn4j.ContainerValue;
 import com.hancomins.jsn4j.ObjectContainer;
+import com.hancomins.jsn4j.ValueWriter;
 
 import java.util.*;
 
@@ -10,7 +11,8 @@ import java.util.*;
  * JSON 배열을 문자열로 직접 작성하는 StringBuilder 기반 Writer
  * ThreadLocal 캐싱을 통해 StringBuilder를 재사용합니다.
  */
-public class JsonArrayStringWriter extends AbstractJsonStringWriter<JsonArrayStringWriter> {
+@SuppressWarnings("unchecked")
+public class JsonArrayStringWriter extends AbstractJsonStringWriter<JsonArrayStringWriter> implements ValueWriter {
     
     private int elementCount = 0;
     
@@ -216,8 +218,11 @@ public class JsonArrayStringWriter extends AbstractJsonStringWriter<JsonArrayStr
     }
     
     @Override
-    public String build() {
-        return buildInternal(']');
+    protected String build(boolean checkClosed) {
+        if(checkClosed) {
+            return buildInternal(']');
+        }
+        return builder.toString() + ']';
     }
     
     /**

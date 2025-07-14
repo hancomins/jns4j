@@ -2,6 +2,7 @@ package com.hancomins.jsn4j.tool;
 
 import com.hancomins.jsn4j.ArrayContainer;
 import com.hancomins.jsn4j.ContainerValue;
+import com.hancomins.jsn4j.KeyValueWriter;
 import com.hancomins.jsn4j.ObjectContainer;
 
 import java.util.*;
@@ -10,7 +11,8 @@ import java.util.*;
  * JSON 객체를 문자열로 직접 작성하는 StringBuilder 기반 Writer
  * ThreadLocal 캐싱을 통해 StringBuilder를 재사용합니다.
  */
-public class JsonObjectStringWriter extends AbstractJsonStringWriter<JsonObjectStringWriter> {
+@SuppressWarnings("unchecked")
+public class JsonObjectStringWriter extends AbstractJsonStringWriter<JsonObjectStringWriter> implements KeyValueWriter {
     
     private int elementCount = 0; // 현재 요소 개수
 
@@ -112,11 +114,13 @@ public class JsonObjectStringWriter extends AbstractJsonStringWriter<JsonObjectS
         return this;
     }
 
+
     public JsonObjectStringWriter put(String key, Object value) {
         checkClosed();
         appendCommaIfNeeded();
         appendKey(key);
 
+        //noinspection DuplicatedCode
         if (value instanceof Map) {
             appendMap((Map<?, ?>) value);
         } else if (value instanceof Collection) {
@@ -125,7 +129,8 @@ public class JsonObjectStringWriter extends AbstractJsonStringWriter<JsonObjectS
             appendObjectContainer((ObjectContainer) value);
         } else if (value instanceof ArrayContainer) {
             appendArrayContainer((ArrayContainer) value);
-        } else {
+        }
+        else {
             appendObject(value);
         }
 
@@ -225,8 +230,12 @@ public class JsonObjectStringWriter extends AbstractJsonStringWriter<JsonObjectS
     }
     
     @Override
-    public String build() {
-        return buildInternal('}');
+    public String build(boolean checkClosed) {
+        if(checkClosed) {
+            return buildInternal('}');
+        }
+        return builder.toString() + '}';
+
     }
     
     /**

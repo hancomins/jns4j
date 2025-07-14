@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings({"UnusedReturnValue", "unused"})
-public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<String, ContainerValue>>, ContainerFactoryProvidable {
+public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<String, ContainerValue>>, ContainerFactoryProvidable, KeyValueWriter {
 
     int size();
 
@@ -39,6 +39,8 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
     }
 
 
+
+
     /**
      * 객체를 생성하고, 키에 매핑하여 반환합니다.
      * @param key 키
@@ -71,6 +73,9 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
     }
     ObjectContainer put(String key, ContainerValue value);
 
+    default ObjectContainer putNull(String key) {
+        return put(key, getContainerFactory().newPrimitive(null));
+    }
 
 
     ContainerValue remove(String key);
