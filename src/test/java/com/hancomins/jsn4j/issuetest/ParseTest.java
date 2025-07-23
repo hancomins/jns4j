@@ -19,8 +19,8 @@ public class ParseTest {
             // Handle the exception, e.g., log it or assert it
             System.out.println("Parse error: " + e.getMessage());
         }
-
     }
+
 
 
 }

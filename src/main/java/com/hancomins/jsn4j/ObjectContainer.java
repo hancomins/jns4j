@@ -3,10 +3,11 @@ package com.hancomins.jsn4j;
 import java.util.Map;
 import java.util.Set;
 
-@SuppressWarnings({"UnusedReturnValue", "unused"})
+@SuppressWarnings({"UnusedReturnValue", "unused", "unchecked"})
 public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<String, ContainerValue>>, ContainerFactoryProvidable, KeyValueWriter {
 
     int size();
+
 
 
 
@@ -110,7 +111,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     default String getString(String key) {
         ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        if(ContainerValue == null || ContainerValue.isNull()) {
             return null;
         }
         else if(ContainerValue.isPrimitive()) {
@@ -132,7 +133,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     default String getString(String key, String defaultValue) {
         ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        if(ContainerValue == null || ContainerValue.isNull()) {
             return defaultValue;
         } else if(ContainerValue.isPrimitive()) {
             return ((PrimitiveValue)ContainerValue).asString();
@@ -145,7 +146,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     default boolean getBoolean(String key) {
         ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        if(ContainerValue == null || ContainerValue.isNull()) {
             return false;
         } else if(ContainerValue.isPrimitive()) {
             return ((PrimitiveValue)ContainerValue).asBoolean();
@@ -155,11 +156,11 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
     }
 
     default boolean getBoolean(String key, boolean defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asBooleanOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asBooleanOr(defaultValue);
         } else {
             return defaultValue;
         }
@@ -168,108 +169,108 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
     // ---- 숫자형 ----
 
     default short getShort(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return Short.MIN_VALUE;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asShort();
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asShort();
         } else {
             return Short.MIN_VALUE;
         }
     }
 
     default short getShort(String key, short defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asShortOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asShortOr(defaultValue);
         } else {
             return defaultValue;
         }
     }
 
     default int getInt(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return Integer.MIN_VALUE;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asInt();
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asInt();
         } else {
             return Integer.MIN_VALUE;
         }
     }
 
     default int getInt(String key, int defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asIntOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asIntOr(defaultValue);
         } else {
             return defaultValue;
         }
     }
 
     default long getLong(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return Long.MIN_VALUE;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asLong();
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asLong();
         } else {
             return Long.MIN_VALUE;
         }
     }
 
     default long getLong(String key, long defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asLongOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asLongOr(defaultValue);
         } else {
             return defaultValue;
         }
     }
 
     default float getFloat(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return Float.NaN;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asFloat();
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asFloat();
         } else {
             return Float.NaN;
         }
     }
     default float getFloat(String key, float defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asFloatOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asFloatOr(defaultValue);
         } else {
             return defaultValue;
         }
     }
 
     default double getDouble(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return Double.NaN;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asDouble();
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asDouble();
         } else {
             return Double.NaN;
         }
     }
     default double getDouble(String key, double defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asDoubleOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asDoubleOr(defaultValue);
         } else {
             return defaultValue;
         }
@@ -278,21 +279,21 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
     // ---- 바이트 배열 ----
 
     default byte[] getByteArray(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return null;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asByteArray();
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asByteArray();
         } else {
             return null;
         }
     }
     default byte[] getByteArray(String key, byte[] defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isPrimitive()) {
-            return ((PrimitiveValue)ContainerValue).asByteArrayOr(defaultValue);
+        } else if(containerValue.isPrimitive()) {
+            return ((PrimitiveValue)containerValue).asByteArrayOr(defaultValue);
         } else {
             return defaultValue;
         }
@@ -300,22 +301,22 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
 
     default ObjectContainer getObject(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return null;
-        } else if(ContainerValue.isObject()) {
-            return (ObjectContainer) ContainerValue;
+        } else if(containerValue.isObject()) {
+            return (ObjectContainer) containerValue;
         } else {
             return null;
         }
     }
 
     default ObjectContainer getObject(String key, ObjectContainer defaultValue) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return defaultValue;
-        } else if(ContainerValue.isObject()) {
-            return (ObjectContainer) ContainerValue;
+        } else if(containerValue.isObject()) {
+            return (ObjectContainer) containerValue;
         } else {
             return defaultValue;
         }
@@ -323,7 +324,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     default ObjectContainer getObjectOrNew(String key) {
         ObjectContainer objectContainer = getObject(key);
-        if(objectContainer == null) {
+        if(objectContainer == null || objectContainer.isNull()) {
             objectContainer = this.newAndPutObject(key);
         }
         return objectContainer;
@@ -331,11 +332,11 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
 
     default ArrayContainer getArray(String key) {
-        ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        ContainerValue containerValue = get(key);
+        if(containerValue == null || containerValue.isNull()) {
             return null;
-        } else if(ContainerValue.isArray()) {
-            return (ArrayContainer) ContainerValue;
+        } else if(containerValue.isArray()) {
+            return (ArrayContainer) containerValue;
         } else {
             return null;
         }
@@ -343,7 +344,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     default ArrayContainer getArray(String key, ArrayContainer defaultValue) {
         ContainerValue ContainerValue = get(key);
-        if(ContainerValue == null) {
+        if(ContainerValue == null || ContainerValue.isNull()) {
             return defaultValue;
         } else if(ContainerValue.isArray()) {
             return (ArrayContainer) ContainerValue;
@@ -354,7 +355,7 @@ public interface ObjectContainer extends ContainerValue, Iterable<Map.Entry<Stri
 
     default ArrayContainer getArrayOrNew(String key) {
         ArrayContainer arrayContainer = getArray(key);
-        if(arrayContainer == null) {
+        if(arrayContainer == null || arrayContainer.isNull()) {
             arrayContainer = this.newAndPutArray(key);
         }
         return arrayContainer;

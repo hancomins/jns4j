@@ -153,7 +153,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default String getString(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return null;
         }
         if (value instanceof PrimitiveValue) {
@@ -165,7 +165,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default String getString(int index, String defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -179,7 +179,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default boolean getBoolean(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return false;
         }
         if (value instanceof PrimitiveValue) {
@@ -191,7 +191,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
     default boolean getBoolean(int index, boolean defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -205,7 +205,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default short getShort(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return Short.MIN_VALUE;
         }
         if (value instanceof PrimitiveValue) {
@@ -217,7 +217,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default short getShort(int index, short defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -229,7 +229,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default int getInt(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return Integer.MIN_VALUE;
         }
         if (value instanceof PrimitiveValue) {
@@ -240,7 +240,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
     default int getInt(int index, int defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -252,7 +252,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default long getLong(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return Long.MIN_VALUE;
         }
         if (value instanceof PrimitiveValue) {
@@ -263,7 +263,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
     default long getLong(int index, long defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -275,7 +275,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default float getFloat(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return Float.NaN;
         }
         if (value instanceof PrimitiveValue) {
@@ -286,7 +286,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
     }
     default float getFloat(int index, float defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -298,7 +298,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default double getDouble(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return Double.NaN;
         }
         if (value instanceof PrimitiveValue) {
@@ -310,7 +310,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default double getDouble(int index, double defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
@@ -324,7 +324,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default byte[] getByteArray(int index) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return null;
         }
         if (value instanceof PrimitiveValue) {
@@ -336,7 +336,7 @@ public interface ArrayContainer extends ContainerValue, Iterable<ContainerValue>
 
     default byte[] getByteArray(int index, byte[] defaultValue) {
         ContainerValue value = get(index);
-        if (value == null) {
+        if (value == null || value.isNull()) {
             return defaultValue;
         }
         if (value instanceof PrimitiveValue) {
